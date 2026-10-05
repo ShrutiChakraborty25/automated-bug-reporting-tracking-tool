@@ -47,8 +47,17 @@ automated-bug-reporting-tracking-tool/
 
 ## Project Status
 
-Day 1 - Initial project setup completed.
+## Project Status
 
-## Author
+### Day 1
+- Development environment setup completed
+- GitHub repository created
+- Initial project structure created
+- README and .gitignore added
+- Initial Git commit pushed to GitHub
 
-M.Tech Software Systems Student
+### Day 2
+- Node.js project initialized
+- Express.js installed
+- Basic Express server created
+- Local development server tested successfully

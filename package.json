@@ -1,0 +1,28 @@
+{
+  "name": "automated-bug-reporting-tracking-tool",
+  "version": "1.0.0",
+  "description": "An automated bug reporting and tracking system that captures test failures, stores bug information, categorizes defects, and provides a web-based dashboard for bug monitoring and analysis.",
+  "main": "index.js",
+  "directories": {
+    "doc": "docs",
+    "test": "tests"
+  },
+  "scripts": {
+  "start": "node src/server.js"
+},
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ShrutiChakraborty25/automated-bug-reporting-tracking-tool.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/ShrutiChakraborty25/automated-bug-reporting-tracking-tool/issues"
+  },
+  "homepage": "https://github.com/ShrutiChakraborty25/automated-bug-reporting-tracking-tool#readme",
+  "dependencies": {
+    "express": "^5.2.1"
+  }
+}
