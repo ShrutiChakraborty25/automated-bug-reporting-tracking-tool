@@ -8,7 +8,8 @@
     "test": "tests"
   },
   "scripts": {
-  "start": "node src/server.js"
+    "start": "node src/server.js",
+    "test:e2e": "playwright test"
 },
   "repository": {
     "type": "git",
@@ -24,5 +25,8 @@
   "homepage": "https://github.com/ShrutiChakraborty25/automated-bug-reporting-tracking-tool#readme",
   "dependencies": {
     "express": "^5.2.1"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.64.0"
   }
 }

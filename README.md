@@ -61,3 +61,12 @@ automated-bug-reporting-tracking-tool/
 - Express.js installed
 - Basic Express server created
 - Local development server tested successfully
+
+### Day 3
+- Playwright installed
+- Playwright browsers installed
+- Demo web application created
+- Playwright configuration created
+- First end-to-end browser test created
+- Automated test executed successfully
+- Screenshot-on-failure configuration added
