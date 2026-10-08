@@ -17,3 +17,13 @@ test("home page should load successfully", async ({ page }) => {
         })
     ).toBeVisible();
 });
+
+test("login button should have incorrect text", async ({ page }) => {
+    await page.goto("/");
+
+    await expect(
+        page.getByRole("button", {
+            name: "Logout"
+        })
+    ).toBeVisible();
+});

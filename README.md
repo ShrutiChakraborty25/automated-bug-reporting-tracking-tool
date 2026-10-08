@@ -70,3 +70,11 @@ automated-bug-reporting-tracking-tool/
 - First end-to-end browser test created
 - Automated test executed successfully
 - Screenshot-on-failure configuration added
+
+### Day 4
+- Configured Playwright failure screenshot capture
+- Configured Playwright trace retention on failure
+- Created an intentional failing test
+- Verified Playwright failure detection
+- Verified failure screenshot generation
+- Observed Playwright error information
