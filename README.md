@@ -78,3 +78,21 @@ automated-bug-reporting-tracking-tool/
 - Verified Playwright failure detection
 - Verified failure screenshot generation
 - Observed Playwright error information
+
+### Day 5
+- Created custom Playwright bug reporter
+- Automatically detected failed tests
+- Automatically captured test error information
+- Automatically located failure screenshots
+- Generated structured JSON bug reports
+- Added generated bug reports to .gitignore
+
+### Day 6
+- Installed SQLite database library
+- Created SQLite database connection
+- Designed modules table
+- Designed tests table
+- Designed bugs table
+- Added relationships between bugs, tests and modules
+- Verified database tables successfully
+- Added SQLite database files to .gitignore
