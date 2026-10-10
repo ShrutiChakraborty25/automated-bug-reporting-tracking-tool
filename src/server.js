@@ -2,6 +2,8 @@ const express = require("express");
 
 const app = express();
 
+app.use(express.json());
+
 const PORT = 3000;
 
 app.get("/", (req, res) => {
@@ -55,6 +57,61 @@ app.get("/api/bugs", (req, res) => {
         res.status(500).json({
             success: false,
             message: "Unable to retrieve bug records."
+        });
+    }
+});
+
+
+app.patch("/api/bugs/:id/status", (req, res) => {
+    try {
+        const bugId = Number(req.params.id);
+        const { status } = req.body;
+
+        if (!Number.isInteger(bugId) || bugId <= 0) {
+            return res.status(400).json({
+                success: false,
+                message: "Invalid bug ID."
+            });
+        }
+
+        const allowedStatuses = [
+            "Open",
+            "In Progress",
+            "Resolved"
+        ];
+
+        if (!allowedStatuses.includes(status)) {
+            return res.status(400).json({
+                success: false,
+                message: "Status must be Open, In Progress, or Resolved."
+            });
+        }
+
+        const result = db.prepare(`
+            UPDATE bugs
+            SET status = ?
+            WHERE id = ?
+        `).run(status, bugId);
+
+        if (result.changes === 0) {
+            return res.status(404).json({
+                success: false,
+                message: "Bug not found."
+            });
+        }
+
+        res.json({
+            success: true,
+            message: "Bug status updated successfully.",
+            bugId,
+            status
+        });
+    } catch (error) {
+        console.error("Error updating bug status:", error);
+
+        res.status(500).json({
+            success: false,
+            message: "Unable to update bug status."
         });
     }
 });
