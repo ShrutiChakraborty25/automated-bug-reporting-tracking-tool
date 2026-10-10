@@ -96,3 +96,12 @@ automated-bug-reporting-tracking-tool/
 - Added relationships between bugs, tests and modules
 - Verified database tables successfully
 - Added SQLite database files to .gitignore
+
+
+### Day 7
+- Connected the Playwright custom reporter to SQLite.
+- Stored failed test executions in the tests table.
+- Stored bug records linked to test executions.
+- Saved error messages and available screenshot paths.
+- Verified generated bug records using a database query.
+- Set initial bug severity to Major and status to Open.
