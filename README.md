@@ -163,3 +163,33 @@ Test endpoint: http://localhost:3000/api/bugs
 
 
 
+## API Documentation
+
+The application provides REST APIs for retrieving bug reports, updating bug statuses, and viewing bug statistics.
+
+### 1. Get All Bugs
+- **Method:** GET
+- **Endpoint:** `/api/bugs`
+- **Purpose:** Retrieves recorded bugs, including their severity, status, module, error message, and screenshot path.
+
+### 2. Update Bug Status
+- **Method:** PATCH
+- **Endpoint:** `/api/bugs/:id/status`
+- **Purpose:** Updates the status of a specific bug.
+- **Supported statuses:** `Open`, `In Progress`, `Resolved`
+- **Validation:** Invalid IDs and status values are rejected; missing bugs return an appropriate error.
+
+### 3. Get Bug Statistics
+- **Method:** GET
+- **Endpoint:** `/api/bugs/stats`
+- **Purpose:** Retrieves the total number of bugs and their counts grouped by status and severity.
+
+### Technologies
+- Node.js and Express.js
+- SQLite with better-sqlite3
+- Playwright for automated testing
+
+
+
+
+
