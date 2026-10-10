@@ -117,6 +117,41 @@ app.patch("/api/bugs/:id/status", (req, res) => {
 });
 
 
+app.get("/api/bugs/stats", (req, res) => {
+    try {
+        const total = db.prepare(`
+            SELECT COUNT(*) AS count FROM bugs
+        `).get().count;
+
+        const statusStats = db.prepare(`
+            SELECT status, COUNT(*) AS count
+            FROM bugs
+            GROUP BY status
+        `).all();
+
+        const severityStats = db.prepare(`
+            SELECT severity, COUNT(*) AS count
+            FROM bugs
+            GROUP BY severity
+        `).all();
+
+        res.json({
+            success: true,
+            totalBugs: total,
+            byStatus: statusStats,
+            bySeverity: severityStats
+        });
+    } catch (error) {
+        console.error("Error retrieving bug statistics:", error);
+
+        res.status(500).json({
+            success: false,
+            message: "Unable to retrieve bug statistics."
+        });
+    }
+});
+
+
 app.listen(PORT, () => {
     console.log(`Server is running at http://localhost:${PORT}`);
 });
