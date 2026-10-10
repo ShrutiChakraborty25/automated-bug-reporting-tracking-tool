@@ -28,14 +28,37 @@ class BugReporter {
             VALUES (?, ?, ?)
         `).run(test.title, result.status, timestamp);
 
-        // Store this failure as a bug.
+        // Identify the application module.
+        const moduleRules = [
+            { keyword: "login", name: "Login" },
+            { keyword: "dashboard", name: "Dashboard" },
+            { keyword: "user", name: "User Management" },
+            { keyword: "report", name: "Reports" }
+        ];
+
+        const matchedModule = moduleRules.find((item) =>
+            test.title.toLowerCase().includes(item.keyword)
+        );
+
+        const moduleName = matchedModule
+            ? matchedModule.name
+            : "Dashboard";
+
+        const moduleRow = db.prepare(`
+            SELECT id FROM modules WHERE name = ?
+        `).get(moduleName);
+
+        const moduleId = moduleRow ? moduleRow.id : null;
+
+        // Store the bug, including its module ID.
         db.prepare(`
             INSERT INTO bugs
-            (test_id, title, severity, status, error_message,
-             screenshot_path, created_at)
-            VALUES (?, ?, ?, ?, ?, ?, ?)
+            (test_id, module_id, title, severity, status,
+             error_message, screenshot_path, created_at)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
         `).run(
             testResult.lastInsertRowid,
+            moduleId,
             test.title,
             "Major",
             "Open",
@@ -51,6 +74,7 @@ class BugReporter {
         const report = {
             testName: test.title,
             status: result.status,
+            module: moduleName,
             errorMessage,
             screenshotPath,
             timestamp
@@ -63,7 +87,7 @@ class BugReporter {
             JSON.stringify(report, null, 2)
         );
 
-        console.log(`Bug saved to SQLite: ${test.title}`);
+        console.log(`Bug saved to SQLite: ${test.title} (${moduleName})`);
     }
 }
 
