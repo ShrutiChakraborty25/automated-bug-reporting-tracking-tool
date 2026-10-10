@@ -10,6 +10,23 @@ class BugReporter {
         }
 
         const errorMessage = result.error?.message || "Unknown error";
+        const errorText = errorMessage.toLowerCase();
+
+let severity = "Minor";
+
+if (
+    errorText.includes("crash") ||
+    errorText.includes("critical") ||
+    errorText.includes("data loss")
+) {
+    severity = "Critical";
+} else if (
+    errorText.includes("timeout") ||
+    errorText.includes("not found") ||
+    errorText.includes("not visible")
+) {
+    severity = "Major";
+}
 
         const screenshot = result.attachments.find(
             (attachment) =>
@@ -57,14 +74,14 @@ class BugReporter {
              error_message, screenshot_path, created_at)
             VALUES (?, ?, ?, ?, ?, ?, ?, ?)
         `).run(
-            testResult.lastInsertRowid,
-            moduleId,
-            test.title,
-            "Major",
-            "Open",
-            errorMessage,
-            screenshotPath,
-            timestamp
+           testResult.lastInsertRowid,
+moduleId,
+test.title,
+severity,
+"Open",
+errorMessage,
+screenshotPath,
+timestamp
         );
 
         // Keep a JSON report as well.
