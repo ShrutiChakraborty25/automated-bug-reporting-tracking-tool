@@ -1,0 +1,77 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bug Tracking Dashboard</title>
+  <link rel="stylesheet" href="/dashboard.css">
+</head>
+<body>
+  <header>
+    <h1>Bug Tracking Dashboard</h1>
+    <p>Automated Bug Reporting & Tracking Tool</p>
+  </header>
+
+  <main>
+    <section class="summary">
+      <article class="card">
+        <h3>Total Bugs</h3>
+        <p id="totalBugs">Loading...</p>
+      </article>
+
+      <article class="card">
+        <h3>Open Bugs</h3>
+        <p id="openBugs">0</p>
+      </article>
+
+      <article class="card">
+        <h3>In Progress</h3>
+        <p id="inProgressBugs">0</p>
+      </article>
+
+      <article class="card">
+        <h3>Resolved Bugs</h3>
+        <p id="resolvedBugs">0</p>
+      </article>
+    </section>
+
+    <section class="bugs-section">
+      <h2>Reported Bugs</h2>
+      <p id="message">Loading bugs...</p>
+
+      <label for="statusFilter">Filter by status:</label>
+      <select id="statusFilter">
+        <option value="All">All</option>
+        <option value="Open">Open</option>
+        <option value="In Progress">In Progress</option>
+        <option value="Resolved">Resolved</option>
+      </select>
+
+      <label for="severityFilter">Filter by severity:</label>
+      <select id="severityFilter">
+        <option value="All">All</option>
+        <option value="Critical">Critical</option>
+        <option value="Major">Major</option>
+        <option value="Minor">Minor</option>
+      </select>
+
+      <div class="table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th>Bug</th>
+              <th>Module</th>
+              <th>Severity</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody id="bugsTable"></tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+
+  <script src="/dashboard.js"></script>
+</body>
+</html>
