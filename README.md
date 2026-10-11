@@ -159,6 +159,8 @@ Test endpoint: http://localhost:3000/api/bugs
 - Returned appropriate errors for invalid requests and missing bugs.
 - Verified status changes through the existing GET /api/bugs endpoint.
 
+The dashboard supports client-side filtering of bug reports by status: All, Open, In Progress, and Resolved.
+
 
 
 
