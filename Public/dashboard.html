@@ -40,6 +40,15 @@
       <h2>Reported Bugs</h2>
       <p id="message">Loading bugs...</p>
 
+
+<section class="chart-section">
+  <h2>Bug Severity Overview</h2>
+  <div class="chart-container">
+    <canvas id="severityChart"></canvas>
+  </div>
+</section>
+
+
       <label for="searchInput">Search bugs:</label>
 <input
   type="text"
@@ -122,6 +131,8 @@
 </div>
 
 
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="/dashboard.js"></script>
 </body>
 </html>

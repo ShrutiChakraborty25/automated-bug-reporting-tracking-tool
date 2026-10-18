@@ -341,4 +341,84 @@ function escapeHtml(value) {
   })[char]);
 }
 
+
+let severityChart = null;
+
+async function loadSeverityChart() {
+  const canvas = document.getElementById("severityChart");
+
+  if (!canvas) {
+    console.error("Severity chart canvas not found.");
+    return;
+  }
+
+  if (typeof Chart === "undefined") {
+    console.error("Chart.js did not load.");
+    return;
+  }
+
+  try {
+    const response = await fetch("/api/bugs/stats");
+
+    if (!response.ok) {
+      throw new Error("Unable to load bug statistics.");
+    }
+
+    const statsData = await response.json();
+
+    if (!statsData.success) {
+      throw new Error("Bug statistics API returned an error.");
+    }
+
+    const severityCounts = {
+      Critical: 0,
+      Major: 0,
+      Minor: 0
+    };
+
+    statsData.bySeverity.forEach(item => {
+      severityCounts[item.severity] = item.count;
+    });
+
+    if (severityChart) {
+      severityChart.destroy();
+    }
+
+    severityChart = new Chart(canvas, {
+      type: "doughnut",
+      data: {
+        labels: ["Critical", "Major", "Minor"],
+        datasets: [{
+          label: "Number of Bugs",
+          data: [
+            severityCounts.Critical,
+            severityCounts.Major,
+            severityCounts.Minor
+          ],
+          backgroundColor: ["#dc2626", "#f59e0b", "#16a34a"],
+          borderColor: "#ffffff",
+          borderWidth: 3
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: {
+            position: "bottom"
+          },
+          title: {
+            display: true,
+            text: "Bugs by Severity"
+          }
+        }
+      }
+    });
+  } catch (error) {
+    console.error("Severity chart error:", error);
+  }
+}
+
+
 loadDashboard();
+loadSeverityChart();

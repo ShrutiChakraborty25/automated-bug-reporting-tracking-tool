@@ -181,6 +181,13 @@ Users can inspect a bug's error message and screenshot path from the dashboard u
 - Close the modal using the close button, Escape key, or overlay.
 
 
+### Bug Severity Analytics
+
+- Displays a doughnut chart showing Critical, Major, and Minor bugs.
+- Retrieves statistics from the existing bug statistics API.
+- Updates the chart using current database counts when the dashboard loads.
+
+
 
 
 
