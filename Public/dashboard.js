@@ -170,56 +170,75 @@ const filteredBugs = bugsData.bugs.filter(bug => {
 
         detailsButton.textContent = "View Details";
 
-        detailsButton.addEventListener("click", () => {
-          const screenshotUrl = `/api/bugs/${bug.id}/screenshot`;
-          const detailsWindow = window.open("", "_blank");
+        
+detailsButton.addEventListener("click", async () => {
+  const modal = document.getElementById("bugModal");
+  const closeButton = document.getElementById("closeModal");
+  const screenshot = document.getElementById("modalBugScreenshot");
+  const screenshotMessage = document.getElementById("modalScreenshotMessage");
 
-          if (!detailsWindow) {
-            message.textContent =
-              "Please allow pop-ups to view bug details.";
-            return;
-          }
+  document.getElementById("modalBugTitle").textContent = bug.title;
+  document.getElementById("modalBugModule").textContent =
+    bug.module_name || "Unassigned";
+  document.getElementById("modalBugSeverity").textContent = bug.severity;
+  document.getElementById("modalBugStatus").textContent = bug.status;
+  document.getElementById("modalBugError").textContent =
+    bug.error_message || "No error message available";
 
-          detailsWindow.document.write(`
-            <!DOCTYPE html>
-            <html>
-              <head>
-                <title>Bug Details</title>
-                <meta name="viewport" content="width=device-width, initial-scale=1">
-              </head>
-              <body style="font-family: Arial, sans-serif; padding: 20px;">
-                <h2>${escapeHtml(bug.title)}</h2>
-                <h3>Error Message</h3>
-                <pre style="white-space: pre-wrap;">${escapeHtml(
-                  bug.error_message || "No error message available"
-                )}</pre>
-                <h3>Screenshot</h3>
-                <img id="bugScreenshot" alt="Bug screenshot"
-                     style="max-width: 100%; display: none;">
-                <p id="screenshotMessage">Loading screenshot...</p>
-              </body>
-            </html>
-          `);
+  screenshot.hidden = true;
+  screenshot.removeAttribute("src");
+  screenshotMessage.textContent = "Loading screenshot...";
 
-          detailsWindow.document.close();
+  modal.hidden = false;
+  closeButton.focus();
 
-          const screenshotImage =
-            detailsWindow.document.getElementById("bugScreenshot");
-          const screenshotMessage =
-            detailsWindow.document.getElementById("screenshotMessage");
+  const closeModal = () => {
+    modal.hidden = true;
+    screenshot.removeAttribute("src");
+    detailsButton.focus();
+  };
 
-          screenshotImage.onload = () => {
-            screenshotImage.style.display = "block";
-            screenshotMessage.textContent = "";
-          };
+  closeButton.onclick = closeModal;
 
-          screenshotImage.onerror = () => {
-            screenshotMessage.textContent =
-              "Screenshot unavailable. Check that the file exists.";
-          };
+  modal.onclick = event => {
+    if (event.target === modal) {
+      closeModal();
+    }
+  };
 
-          screenshotImage.src = screenshotUrl;
-        });
+  const handleEscape = event => {
+    if (event.key === "Escape" && !modal.hidden) {
+      closeModal();
+    }
+  };
+
+  document.addEventListener("keydown", handleEscape, { once: true });
+
+  try {
+    const response = await fetch(`/api/bugs/${bug.id}/screenshot`);
+
+    if (!response.ok) {
+      throw new Error("Screenshot unavailable.");
+    }
+
+    const screenshotUrl = URL.createObjectURL(await response.blob());
+
+    screenshot.onload = () => {
+      screenshot.hidden = false;
+      screenshotMessage.textContent = "";
+      URL.revokeObjectURL(screenshotUrl);
+    };
+
+    screenshot.onerror = () => {
+      screenshotMessage.textContent = "Unable to display screenshot.";
+      URL.revokeObjectURL(screenshotUrl);
+    };
+
+    screenshot.src = screenshotUrl;
+  } catch (error) {
+    screenshotMessage.textContent = error.message;
+  }
+});
 
         detailsCell.appendChild(detailsButton);
         row.appendChild(detailsCell);

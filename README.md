@@ -173,6 +173,15 @@ Users can inspect a bug's error message and screenshot path from the dashboard u
 - Display up to five bug records per page.
 
 
+### Bug Details Modal
+
+- View bug details without opening a separate browser tab.
+- Display bug title, module, severity, status, and error message.
+- Preview the screenshot of the failed test.
+- Close the modal using the close button, Escape key, or overlay.
+
+
+
 
 
 
