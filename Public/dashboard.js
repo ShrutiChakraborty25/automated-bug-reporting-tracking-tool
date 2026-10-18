@@ -5,6 +5,7 @@ async function loadDashboard() {
   const bugsTable = document.getElementById("bugsTable");
   const statusFilter = document.getElementById("statusFilter");
   const severityFilter = document.getElementById("severityFilter");
+  const sortBy = document.getElementById("sortBy");
   const searchInput = document.getElementById("searchInput");
   const prevPage = document.getElementById("prevPage");
   const nextPage = document.getElementById("nextPage");
@@ -70,6 +71,29 @@ const filteredBugs = bugsData.bugs.filter(bug => {
 
   return matchesStatus && matchesSeverity && matchesSearch;
 });
+
+const severityRank = {
+  Critical: 3,
+  Major: 2,
+  Minor: 1
+};
+
+const sortedBugs = [...filteredBugs];
+
+if (sortBy.value === "title") {
+  sortedBugs.sort((a, b) =>
+    (a.title || "").localeCompare(b.title || "")
+  );
+} else if (sortBy.value === "severity") {
+  sortedBugs.sort((a, b) =>
+    (severityRank[b.severity] || 0) -
+    (severityRank[a.severity] || 0)
+  );
+} else if (sortBy.value === "status") {
+  sortedBugs.sort((a, b) =>
+    (a.status || "").localeCompare(b.status || "")
+  );
+}
 
       const totalPages = Math.max(
         1,
@@ -262,6 +286,11 @@ detailsButton.addEventListener("click", async () => {
       currentPage = 1;
       renderBugs();
     };
+
+    sortBy.onchange = () => {
+  currentPage = 1;
+  renderBugs();
+};
 
     searchInput.oninput = () => {
   currentPage = 1;
