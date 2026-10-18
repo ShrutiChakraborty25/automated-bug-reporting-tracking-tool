@@ -161,6 +161,8 @@ Test endpoint: http://localhost:3000/api/bugs
 
 The dashboard supports client-side filtering of bug reports by status: All, Open, In Progress, and Resolved.
 
+Users can inspect a bug's error message and screenshot path from the dashboard using the View Details action.
+
 
 
 

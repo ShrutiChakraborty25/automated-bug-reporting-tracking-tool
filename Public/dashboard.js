@@ -110,6 +110,21 @@ async function loadDashboard() {
 
         actionCell.append(statusSelect, updateButton);
         row.appendChild(actionCell);
+        const detailsCell = document.createElement("td");
+const detailsButton = document.createElement("button");
+
+detailsButton.textContent = "View Details";
+
+detailsButton.addEventListener("click", () => {
+  alert(
+    `Bug: ${bug.title}\n\n` +
+    `Error: ${bug.error_message || "No error message available"}\n\n` +
+    `Screenshot: ${bug.screenshot_path || "No screenshot available"}`
+  );
+});
+
+detailsCell.appendChild(detailsButton);
+row.appendChild(detailsCell);
         bugsTable.appendChild(row);
       });
     }
