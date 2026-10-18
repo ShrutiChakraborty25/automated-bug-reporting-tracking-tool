@@ -26,17 +26,15 @@ async function loadDashboard() {
     totalBugs.textContent = statsData.totalBugs;
 
     const statusCounts = Object.fromEntries(
-  statsData.byStatus.map(item => [item.status, item.count])
-);
+      statsData.byStatus.map(item => [item.status, item.count])
+    );
 
-document.getElementById("openBugs").textContent =
-  statusCounts["Open"] || 0;
-
-document.getElementById("inProgressBugs").textContent =
-  statusCounts["In Progress"] || 0;
-
-document.getElementById("resolvedBugs").textContent =
-  statusCounts["Resolved"] || 0;
+    document.getElementById("openBugs").textContent =
+      statusCounts["Open"] || 0;
+    document.getElementById("inProgressBugs").textContent =
+      statusCounts["In Progress"] || 0;
+    document.getElementById("resolvedBugs").textContent =
+      statusCounts["Resolved"] || 0;
 
     function renderBugs() {
       bugsTable.replaceChildren();
@@ -45,10 +43,8 @@ document.getElementById("resolvedBugs").textContent =
       const selectedSeverity = severityFilter.value;
 
       const filteredBugs = bugsData.bugs.filter(bug =>
-        (selectedStatus === "All" ||
-          bug.status === selectedStatus) &&
-        (selectedSeverity === "All" ||
-          bug.severity === selectedSeverity)
+        (selectedStatus === "All" || bug.status === selectedStatus) &&
+        (selectedSeverity === "All" || bug.severity === selectedSeverity)
       );
 
       if (filteredBugs.length === 0) {
@@ -61,17 +57,59 @@ document.getElementById("resolvedBugs").textContent =
       filteredBugs.forEach(bug => {
         const row = document.createElement("tr");
 
-        [
-          bug.title,
-          bug.module_name || "Unassigned",
-          bug.severity,
-          bug.status
-        ].forEach(value => {
-          const cell = document.createElement("td");
-          cell.textContent = value ?? "—";
-          row.appendChild(cell);
+        [bug.title, bug.module_name || "Unassigned", bug.severity, bug.status]
+          .forEach(value => {
+            const cell = document.createElement("td");
+            cell.textContent = value ?? "—";
+            row.appendChild(cell);
+          });
+
+        const actionCell = document.createElement("td");
+        const statusSelect = document.createElement("select");
+
+        ["Open", "In Progress", "Resolved"].forEach(status => {
+          const option = document.createElement("option");
+          option.value = status;
+          option.textContent = status;
+          statusSelect.appendChild(option);
         });
 
+        statusSelect.value = bug.status;
+
+        const updateButton = document.createElement("button");
+        updateButton.textContent = "Update";
+
+        updateButton.addEventListener("click", async () => {
+          updateButton.disabled = true;
+          message.textContent = "Updating bug status...";
+
+          try {
+            const response = await fetch(
+              `/api/bugs/${bug.id}/status`,
+              {
+                method: "PATCH",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ status: statusSelect.value })
+              }
+            );
+
+            const result = await response.json();
+
+            if (!response.ok) {
+              throw new Error(result.message || "Status update failed.");
+            }
+
+            await loadDashboard();
+            document.getElementById("message").textContent =
+              "Bug status updated successfully.";
+          } catch (error) {
+            message.textContent = error.message;
+            updateButton.disabled = false;
+          }
+        });
+
+        actionCell.append(statusSelect, updateButton);
+        row.appendChild(actionCell);
         bugsTable.appendChild(row);
       });
     }

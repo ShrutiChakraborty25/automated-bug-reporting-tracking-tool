@@ -115,3 +115,27 @@ th {
 .summary .card p {
   color: #243047;
 }
+
+td select,
+td button {
+  padding: 8px 10px;
+  margin: 3px;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  font-size: 13px;
+}
+
+td button {
+  background: #243f68;
+  color: white;
+  cursor: pointer;
+}
+
+td button:hover {
+  background: #182b49;
+}
+
+td button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
