@@ -116,11 +116,43 @@ const detailsButton = document.createElement("button");
 detailsButton.textContent = "View Details";
 
 detailsButton.addEventListener("click", () => {
-  alert(
-    `Bug: ${bug.title}\n\n` +
-    `Error: ${bug.error_message || "No error message available"}\n\n` +
-    `Screenshot: ${bug.screenshot_path || "No screenshot available"}`
-  );
+  detailsButton.addEventListener("click", () => {
+  const screenshotUrl = `/api/bugs/${bug.id}/screenshot`;
+
+  const detailsWindow = window.open("", "_blank");
+
+  if (!detailsWindow) {
+    message.textContent = "Please allow pop-ups to view bug details.";
+    return;
+  }
+
+  detailsWindow.document.write(`
+    <h2>${escapeHtml(bug.title)}</h2>
+    <h3>Error Message</h3>
+    <pre>${escapeHtml(bug.error_message || "No error message available")}</pre>
+    <h3>Screenshot</h3>
+    <img id="bugScreenshot" alt="Bug screenshot"
+         style="max-width:100%;display:none">
+    <p id="screenshotMessage">Loading screenshot...</p>
+  `);
+
+  const screenshotImage =
+    detailsWindow.document.getElementById("bugScreenshot");
+  const screenshotMessage =
+    detailsWindow.document.getElementById("screenshotMessage");
+
+  screenshotImage.onload = () => {
+    screenshotImage.style.display = "block";
+    screenshotMessage.textContent = "";
+  };
+
+  screenshotImage.onerror = () => {
+    screenshotMessage.textContent =
+      "Screenshot unavailable. Check that the file exists.";
+  };
+
+  screenshotImage.src = screenshotUrl;
+});
 });
 
 detailsCell.appendChild(detailsButton);
@@ -137,6 +169,16 @@ row.appendChild(detailsCell);
     console.error("Dashboard loading error:", error);
     message.textContent = "Unable to load dashboard data.";
   }
+}
+
+function escapeHtml(value) {
+  return String(value).replace(/[&<>"']/g, char => ({
+    "&": "&amp;",
+    "<": "&lt;",
+    ">": "&gt;",
+    '"': "&quot;",
+    "'": "&#39;"
+  })[char]);
 }
 
 loadDashboard();

@@ -1,10 +1,13 @@
+
 const express = require("express");
+const fs = require("fs");
+const path = require("path");
 
 const app = express();
-
 app.use(express.json());
 
 const PORT = 3000;
+const db = require("../database/db");
 
 app.get("/", (req, res) => {
     res.send(`
@@ -22,8 +25,8 @@ app.get("/", (req, res) => {
     `);
 });
 
-
-const db = require("../database/db");
+// Serve dashboard files from the public folder
+app.use(express.static(path.join(__dirname, "../public")));
 
 // API: Retrieve all bugs
 app.get("/api/bugs", (req, res) => {
@@ -49,11 +52,10 @@ app.get("/api/bugs", (req, res) => {
         res.json({
             success: true,
             count: bugs.length,
-            bugs: bugs
+            bugs
         });
     } catch (error) {
         console.error("Error retrieving bugs:", error);
-
         res.status(500).json({
             success: false,
             message: "Unable to retrieve bug records."
@@ -61,7 +63,7 @@ app.get("/api/bugs", (req, res) => {
     }
 });
 
-
+// API: Update bug status
 app.patch("/api/bugs/:id/status", (req, res) => {
     try {
         const bugId = Number(req.params.id);
@@ -74,11 +76,7 @@ app.patch("/api/bugs/:id/status", (req, res) => {
             });
         }
 
-        const allowedStatuses = [
-            "Open",
-            "In Progress",
-            "Resolved"
-        ];
+        const allowedStatuses = ["Open", "In Progress", "Resolved"];
 
         if (!allowedStatuses.includes(status)) {
             return res.status(400).json({
@@ -108,7 +106,6 @@ app.patch("/api/bugs/:id/status", (req, res) => {
         });
     } catch (error) {
         console.error("Error updating bug status:", error);
-
         res.status(500).json({
             success: false,
             message: "Unable to update bug status."
@@ -116,7 +113,7 @@ app.patch("/api/bugs/:id/status", (req, res) => {
     }
 });
 
-
+// API: Retrieve bug statistics
 app.get("/api/bugs/stats", (req, res) => {
     try {
         const total = db.prepare(`
@@ -143,7 +140,6 @@ app.get("/api/bugs/stats", (req, res) => {
         });
     } catch (error) {
         console.error("Error retrieving bug statistics:", error);
-
         res.status(500).json({
             success: false,
             message: "Unable to retrieve bug statistics."
@@ -151,9 +147,65 @@ app.get("/api/bugs/stats", (req, res) => {
     }
 });
 
-const path = require("path");
+// API: View a bug's screenshot
+app.get("/api/bugs/:id/screenshot", (req, res) => {
+    try {
+        const bugId = Number(req.params.id);
 
-app.use(express.static(path.join(__dirname, "../public")));
+        if (!Number.isInteger(bugId) || bugId <= 0) {
+            return res.status(400).json({
+                success: false,
+                message: "Invalid bug ID."
+            });
+        }
+
+        const bug = db.prepare(`
+            SELECT screenshot_path
+            FROM bugs
+            WHERE id = ?
+        `).get(bugId);
+
+        if (!bug) {
+            return res.status(404).json({
+                success: false,
+                message: "Bug not found."
+            });
+        }
+
+        if (!bug.screenshot_path) {
+            return res.status(404).json({
+                success: false,
+                message: "No screenshot available for this bug."
+            });
+        }
+
+        const resultsDirectory = path.resolve(process.cwd(), "test-results");
+        const screenshotPath = path.resolve(
+            process.cwd(),
+            bug.screenshot_path
+        );
+
+        // Ensure the requested file is inside test-results
+        if (
+            !screenshotPath.startsWith(resultsDirectory + path.sep) ||
+            !fs.existsSync(screenshotPath) ||
+            !fs.statSync(screenshotPath).isFile()
+        ) {
+            return res.status(404).json({
+                success: false,
+                message: "Screenshot file not found."
+            });
+        }
+
+        res.sendFile(screenshotPath);
+    } catch (error) {
+        console.error("Screenshot retrieval error:", error);
+        res.status(500).json({
+            success: false,
+            message: "Unable to retrieve screenshot."
+        });
+    }
+});
 
 app.listen(PORT, () => {
     console.log(`Server is running at http://localhost:${PORT}`);
