@@ -207,6 +207,86 @@ app.get("/api/bugs/:id/screenshot", (req, res) => {
     }
 });
 
+
+app.get("/api/bugs/export", (req, res) => {
+  try {
+    const bugs = db.prepare(`
+      SELECT
+        bugs.id,
+        bugs.title,
+        modules.name AS module_name,
+        bugs.severity,
+        bugs.status,
+        bugs.error_message,
+        bugs.screenshot_path,
+        bugs.created_at,
+        tests.test_name,
+        tests.status AS test_status
+      FROM bugs
+      LEFT JOIN tests ON bugs.test_id = tests.id
+      LEFT JOIN modules ON bugs.module_id = modules.id
+      ORDER BY bugs.id DESC
+    `).all();
+
+    const headers = [
+      "Bug ID",
+      "Title",
+      "Module",
+      "Severity",
+      "Status",
+      "Error Message",
+      "Screenshot Path",
+      "Created At",
+      "Test Name",
+      "Test Status"
+    ];
+
+    // Escape CSV values and prevent spreadsheet formula injection.
+    const escapeCsv = value => {
+      let text = String(value ?? "");
+
+      if (/^[\s]*[=+\-@]/.test(text)) {
+        text = "'" + text;
+      }
+
+      return `"${text.replace(/"/g, '""')}"`;
+    };
+
+    const rows = bugs.map(bug => [
+      bug.id,
+      bug.title,
+      bug.module_name,
+      bug.severity,
+      bug.status,
+      bug.error_message,
+      bug.screenshot_path,
+      bug.created_at,
+      bug.test_name,
+      bug.test_status
+    ]);
+
+    const csv = [
+      headers.map(escapeCsv).join(","),
+      ...rows.map(row => row.map(escapeCsv).join(","))
+    ].join("\r\n");
+
+    res.setHeader("Content-Type", "text/csv; charset=utf-8");
+    res.setHeader(
+      "Content-Disposition",
+      'attachment; filename="bug-reports.csv"'
+    );
+
+    res.send("\uFEFF" + csv);
+  } catch (error) {
+    console.error("CSV export error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Unable to export bug reports."
+    });
+  }
+});
+
+
 app.listen(PORT, () => {
     console.log(`Server is running at http://localhost:${PORT}`);
 });

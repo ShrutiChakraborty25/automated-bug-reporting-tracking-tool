@@ -195,6 +195,7 @@ Users can inspect a bug's error message and screenshot path from the dashboard u
 - Refreshes the charts after a bug status is updated.
 - Supports sorting, filtering, searching, and pagination together.
 
+- Export bug reports to CSV for offline analysis and documentation.
 
 
 
