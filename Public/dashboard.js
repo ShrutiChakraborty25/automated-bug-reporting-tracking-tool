@@ -5,6 +5,12 @@ async function loadDashboard() {
   const bugsTable = document.getElementById("bugsTable");
   const statusFilter = document.getElementById("statusFilter");
   const severityFilter = document.getElementById("severityFilter");
+  const prevPage = document.getElementById("prevPage");
+  const nextPage = document.getElementById("nextPage");
+  const pageInfo = document.getElementById("pageInfo");
+
+  let currentPage = 1;
+  const pageSize = 5;
 
   try {
     const [bugsResponse, statsResponse] = await Promise.all([
@@ -31,8 +37,10 @@ async function loadDashboard() {
 
     document.getElementById("openBugs").textContent =
       statusCounts["Open"] || 0;
+
     document.getElementById("inProgressBugs").textContent =
       statusCounts["In Progress"] || 0;
+
     document.getElementById("resolvedBugs").textContent =
       statusCounts["Resolved"] || 0;
 
@@ -47,23 +55,46 @@ async function loadDashboard() {
         (selectedSeverity === "All" || bug.severity === selectedSeverity)
       );
 
+      const totalPages = Math.max(
+        1,
+        Math.ceil(filteredBugs.length / pageSize)
+      );
+
+      if (currentPage > totalPages) {
+        currentPage = totalPages;
+      }
+
       if (filteredBugs.length === 0) {
         message.textContent = "No bugs found for these filters.";
+        pageInfo.textContent = "Page 1 of 1";
+        prevPage.disabled = true;
+        nextPage.disabled = true;
         return;
       }
 
       message.textContent = "";
 
-      filteredBugs.forEach(bug => {
+      const startIndex = (currentPage - 1) * pageSize;
+      const pageBugs = filteredBugs.slice(
+        startIndex,
+        startIndex + pageSize
+      );
+
+      pageBugs.forEach(bug => {
         const row = document.createElement("tr");
 
-        [bug.title, bug.module_name || "Unassigned", bug.severity, bug.status]
-          .forEach(value => {
-            const cell = document.createElement("td");
-            cell.textContent = value ?? "—";
-            row.appendChild(cell);
-          });
+        [
+          bug.title,
+          bug.module_name || "Unassigned",
+          bug.severity,
+          bug.status
+        ].forEach(value => {
+          const cell = document.createElement("td");
+          cell.textContent = value ?? "—";
+          row.appendChild(cell);
+        });
 
+        // Status update controls
         const actionCell = document.createElement("td");
         const statusSelect = document.createElement("select");
 
@@ -88,15 +119,21 @@ async function loadDashboard() {
               `/api/bugs/${bug.id}/status`,
               {
                 method: "PATCH",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ status: statusSelect.value })
+                headers: {
+                  "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                  status: statusSelect.value
+                })
               }
             );
 
             const result = await response.json();
 
             if (!response.ok) {
-              throw new Error(result.message || "Status update failed.");
+              throw new Error(
+                result.message || "Status update failed."
+              );
             }
 
             await loadDashboard();
@@ -110,59 +147,113 @@ async function loadDashboard() {
 
         actionCell.append(statusSelect, updateButton);
         row.appendChild(actionCell);
+
+        // View details and screenshot
         const detailsCell = document.createElement("td");
-const detailsButton = document.createElement("button");
+        const detailsButton = document.createElement("button");
 
-detailsButton.textContent = "View Details";
+        detailsButton.textContent = "View Details";
 
-detailsButton.addEventListener("click", () => {
-  detailsButton.addEventListener("click", () => {
-  const screenshotUrl = `/api/bugs/${bug.id}/screenshot`;
+        detailsButton.addEventListener("click", () => {
+          const screenshotUrl = `/api/bugs/${bug.id}/screenshot`;
+          const detailsWindow = window.open("", "_blank");
 
-  const detailsWindow = window.open("", "_blank");
+          if (!detailsWindow) {
+            message.textContent =
+              "Please allow pop-ups to view bug details.";
+            return;
+          }
 
-  if (!detailsWindow) {
-    message.textContent = "Please allow pop-ups to view bug details.";
-    return;
-  }
+          detailsWindow.document.write(`
+            <!DOCTYPE html>
+            <html>
+              <head>
+                <title>Bug Details</title>
+                <meta name="viewport" content="width=device-width, initial-scale=1">
+              </head>
+              <body style="font-family: Arial, sans-serif; padding: 20px;">
+                <h2>${escapeHtml(bug.title)}</h2>
+                <h3>Error Message</h3>
+                <pre style="white-space: pre-wrap;">${escapeHtml(
+                  bug.error_message || "No error message available"
+                )}</pre>
+                <h3>Screenshot</h3>
+                <img id="bugScreenshot" alt="Bug screenshot"
+                     style="max-width: 100%; display: none;">
+                <p id="screenshotMessage">Loading screenshot...</p>
+              </body>
+            </html>
+          `);
 
-  detailsWindow.document.write(`
-    <h2>${escapeHtml(bug.title)}</h2>
-    <h3>Error Message</h3>
-    <pre>${escapeHtml(bug.error_message || "No error message available")}</pre>
-    <h3>Screenshot</h3>
-    <img id="bugScreenshot" alt="Bug screenshot"
-         style="max-width:100%;display:none">
-    <p id="screenshotMessage">Loading screenshot...</p>
-  `);
+          detailsWindow.document.close();
 
-  const screenshotImage =
-    detailsWindow.document.getElementById("bugScreenshot");
-  const screenshotMessage =
-    detailsWindow.document.getElementById("screenshotMessage");
+          const screenshotImage =
+            detailsWindow.document.getElementById("bugScreenshot");
+          const screenshotMessage =
+            detailsWindow.document.getElementById("screenshotMessage");
 
-  screenshotImage.onload = () => {
-    screenshotImage.style.display = "block";
-    screenshotMessage.textContent = "";
-  };
+          screenshotImage.onload = () => {
+            screenshotImage.style.display = "block";
+            screenshotMessage.textContent = "";
+          };
 
-  screenshotImage.onerror = () => {
-    screenshotMessage.textContent =
-      "Screenshot unavailable. Check that the file exists.";
-  };
+          screenshotImage.onerror = () => {
+            screenshotMessage.textContent =
+              "Screenshot unavailable. Check that the file exists.";
+          };
 
-  screenshotImage.src = screenshotUrl;
-});
-});
+          screenshotImage.src = screenshotUrl;
+        });
 
-detailsCell.appendChild(detailsButton);
-row.appendChild(detailsCell);
+        detailsCell.appendChild(detailsButton);
+        row.appendChild(detailsCell);
+
         bugsTable.appendChild(row);
       });
+
+      // Update pagination controls
+      pageInfo.textContent = `Page ${currentPage} of ${totalPages}`;
+      prevPage.disabled = currentPage === 1;
+      nextPage.disabled = currentPage === totalPages;
     }
 
-    statusFilter.addEventListener("change", renderBugs);
-    severityFilter.addEventListener("change", renderBugs);
+    // Avoid registering duplicate filter listeners
+    statusFilter.onchange = () => {
+      currentPage = 1;
+      renderBugs();
+    };
+
+    severityFilter.onchange = () => {
+      currentPage = 1;
+      renderBugs();
+    };
+
+    prevPage.onclick = () => {
+      if (currentPage > 1) {
+        currentPage--;
+        renderBugs();
+      }
+    };
+
+    nextPage.onclick = () => {
+      const selectedStatus = statusFilter.value;
+      const selectedSeverity = severityFilter.value;
+
+      const filteredCount = bugsData.bugs.filter(bug =>
+        (selectedStatus === "All" || bug.status === selectedStatus) &&
+        (selectedSeverity === "All" || bug.severity === selectedSeverity)
+      ).length;
+
+      const totalPages = Math.max(
+        1,
+        Math.ceil(filteredCount / pageSize)
+      );
+
+      if (currentPage < totalPages) {
+        currentPage++;
+        renderBugs();
+      }
+    };
 
     renderBugs();
   } catch (error) {
