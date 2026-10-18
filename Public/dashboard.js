@@ -5,6 +5,7 @@ async function loadDashboard() {
   const bugsTable = document.getElementById("bugsTable");
   const statusFilter = document.getElementById("statusFilter");
   const severityFilter = document.getElementById("severityFilter");
+  const searchInput = document.getElementById("searchInput");
   const prevPage = document.getElementById("prevPage");
   const nextPage = document.getElementById("nextPage");
   const pageInfo = document.getElementById("pageInfo");
@@ -50,10 +51,25 @@ async function loadDashboard() {
       const selectedStatus = statusFilter.value;
       const selectedSeverity = severityFilter.value;
 
-      const filteredBugs = bugsData.bugs.filter(bug =>
-        (selectedStatus === "All" || bug.status === selectedStatus) &&
-        (selectedSeverity === "All" || bug.severity === selectedSeverity)
-      );
+      const searchTerm = searchInput.value.trim().toLowerCase();
+
+const filteredBugs = bugsData.bugs.filter(bug => {
+  const matchesStatus =
+    selectedStatus === "All" || bug.status === selectedStatus;
+
+  const matchesSeverity =
+    selectedSeverity === "All" || bug.severity === selectedSeverity;
+
+  const searchableText = [
+    bug.title,
+    bug.module_name || "",
+    bug.error_message || ""
+  ].join(" ").toLowerCase();
+
+  const matchesSearch = searchableText.includes(searchTerm);
+
+  return matchesStatus && matchesSeverity && matchesSearch;
+});
 
       const totalPages = Math.max(
         1,
@@ -227,6 +243,11 @@ async function loadDashboard() {
       currentPage = 1;
       renderBugs();
     };
+
+    searchInput.oninput = () => {
+  currentPage = 1;
+  renderBugs();
+};
 
     prevPage.onclick = () => {
       if (currentPage > 1) {

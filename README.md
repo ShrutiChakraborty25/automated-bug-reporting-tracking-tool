@@ -164,6 +164,15 @@ The dashboard supports client-side filtering of bug reports by status: All, Open
 Users can inspect a bug's error message and screenshot path from the dashboard using the View Details action.
 
 
+### Bug Search and Filtering
+
+- Search bugs by title, application module, or error message.
+- Search is case-insensitive and updates results as the user types.
+- Combine search with status and severity filters.
+- Pagination resets to the first page when search criteria change.
+- Display up to five bug records per page.
+
+
 
 
 

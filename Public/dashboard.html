@@ -40,6 +40,13 @@
       <h2>Reported Bugs</h2>
       <p id="message">Loading bugs...</p>
 
+      <label for="searchInput">Search bugs:</label>
+<input
+  type="text"
+  id="searchInput"
+  placeholder="Search title, module, or error..."
+/>
+
       <label for="statusFilter">Filter by status:</label>
       <select id="statusFilter">
         <option value="All">All</option>
@@ -71,7 +78,7 @@
           <tbody id="bugsTable"></tbody>
         </table>
       </div>
-      
+
       <div class="pagination">
   <button id="prevPage" disabled>Previous</button>
   <span id="pageInfo">Page 1</span>
