@@ -27,9 +27,17 @@ async function loadDashboard() {
     const bugsData = await bugsResponse.json();
     const statsData = await statsResponse.json();
 
-    if (!bugsData.success || !statsData.success) {
-      throw new Error("API returned an unsuccessful response.");
-    }
+    if (
+  !bugsData ||
+  bugsData.success !== true ||
+  !Array.isArray(bugsData.bugs) ||
+  !statsData ||
+  statsData.success !== true ||
+  !Array.isArray(statsData.byStatus) ||
+  !Array.isArray(statsData.bySeverity)
+) {
+  throw new Error("Invalid dashboard data received from the server.");
+}
 
     totalBugs.textContent = statsData.totalBugs;
 
@@ -336,9 +344,16 @@ async function loadDashboard() {
 
     renderBugs();
   } catch (error) {
-    console.error("Dashboard loading error:", error);
-    message.textContent = "Unable to load dashboard data.";
-  }
+  console.error("Dashboard loading error:", error);
+  message.textContent =
+    "Unable to load dashboard data. Please refresh the page and try again.";
+
+  totalBugs.textContent = "—";
+  bugsTable.replaceChildren();
+  pageInfo.textContent = "Page 1 of 1";
+  prevPage.disabled = true;
+  nextPage.disabled = true;
+}
 }
 
 
@@ -423,8 +438,14 @@ async function loadSeverityChart() {
       }
     });
   } catch (error) {
-    console.error("Severity chart error:", error);
+  console.error("Severity chart error:", error);
+
+  const message = document.getElementById("message");
+  if (message) {
+    message.textContent =
+      "Unable to load the severity chart. Please refresh the page.";
   }
+}
 }
 
 
@@ -504,8 +525,14 @@ async function loadStatusChart() {
       }
     });
   } catch (error) {
-    console.error("Status chart error:", error);
+  console.error("Status chart error:", error);
+
+  const message = document.getElementById("message");
+  if (message) {
+    message.textContent =
+      "Unable to load the status chart. Please refresh the page.";
   }
+}
 }
 
 
