@@ -197,6 +197,8 @@ Users can inspect a bug's error message and screenshot path from the dashboard u
 
 - Export bug reports to CSV for offline analysis and documentation.
 
+- Export bug reports to PDF directly from the dashboard.
+
 
 
 

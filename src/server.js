@@ -277,6 +277,75 @@ app.get("/api/bugs/export", (req, res) => {
     );
 
     res.send("\uFEFF" + csv);
+
+
+const PDFDocument = require("pdfkit");
+
+app.get("/api/bugs/export/pdf", (req, res) => {
+    try {
+        const bugs = db.prepare(`
+            SELECT
+                bugs.id,
+                bugs.title,
+                modules.name AS module_name,
+                bugs.severity,
+                bugs.status,
+                bugs.error_message,
+                bugs.created_at,
+                tests.test_name
+            FROM bugs
+            LEFT JOIN tests ON bugs.test_id = tests.id
+            LEFT JOIN modules ON bugs.module_id = modules.id
+            ORDER BY bugs.id DESC
+        `).all();
+
+        res.setHeader("Content-Type", "application/pdf");
+        res.setHeader(
+            "Content-Disposition",
+            'attachment; filename="bug-reports.pdf"'
+        );
+
+        const doc = new PDFDocument({ margin: 50 });
+        doc.pipe(res);
+
+        doc.fontSize(20).text("Bug Reports", { align: "center" });
+        doc.moveDown();
+        doc.fontSize(10).text(`Total Bugs: ${bugs.length}`);
+        doc.moveDown();
+
+        bugs.forEach((bug, index) => {
+            if (doc.y > 700) {
+                doc.addPage();
+            }
+
+            doc.fontSize(13).text(`${index + 1}. ${bug.title || "Untitled"}`);
+            doc.fontSize(10);
+            doc.text(`Bug ID: ${bug.id}`);
+            doc.text(`Module: ${bug.module_name || "Unknown"}`);
+            doc.text(`Severity: ${bug.severity}`);
+            doc.text(`Status: ${bug.status}`);
+            doc.text(`Test: ${bug.test_name || "Unknown"}`);
+            doc.text(`Created At: ${bug.created_at || "Unknown"}`);
+            doc.text(`Error: ${bug.error_message || "No error details"}`);
+            doc.moveDown();
+        });
+
+        doc.end();
+    } catch (error) {
+        console.error("PDF export error:", error);
+
+        if (!res.headersSent) {
+            res.status(500).json({
+                success: false,
+                message: "Unable to export bug reports to PDF."
+            });
+        } else {
+            res.destroy(error);
+        }
+    }
+});
+
+
   } catch (error) {
     console.error("CSV export error:", error);
     res.status(500).json({
