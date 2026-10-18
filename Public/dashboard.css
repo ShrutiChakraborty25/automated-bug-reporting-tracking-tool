@@ -285,3 +285,9 @@ td button:disabled {
   height: 320px;
   margin: 0 auto;
 }
+
+
+/* Bug status chart */
+#statusChart {
+  max-width: 100%;
+}

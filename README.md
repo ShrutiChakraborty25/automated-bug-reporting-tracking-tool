@@ -188,6 +188,14 @@ Users can inspect a bug's error message and screenshot path from the dashboard u
 - Updates the chart using current database counts when the dashboard loads.
 
 
+### Bug Status Analytics
+
+- Displays Open, In Progress, and Resolved bugs in a bar chart.
+- Uses the bug statistics API to retrieve current status counts.
+- Refreshes the charts after a bug status is updated.
+- Supports sorting, filtering, searching, and pagination together.
+
+
 
 
 

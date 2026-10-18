@@ -51,60 +51,63 @@ async function loadDashboard() {
 
       const selectedStatus = statusFilter.value;
       const selectedSeverity = severityFilter.value;
-
       const searchTerm = searchInput.value.trim().toLowerCase();
 
-const filteredBugs = bugsData.bugs.filter(bug => {
-  const matchesStatus =
-    selectedStatus === "All" || bug.status === selectedStatus;
+      // Filter bugs by status, severity, and search text.
+      const filteredBugs = bugsData.bugs.filter(bug => {
+        const matchesStatus =
+          selectedStatus === "All" || bug.status === selectedStatus;
 
-  const matchesSeverity =
-    selectedSeverity === "All" || bug.severity === selectedSeverity;
+        const matchesSeverity =
+          selectedSeverity === "All" ||
+          bug.severity === selectedSeverity;
 
-  const searchableText = [
-    bug.title,
-    bug.module_name || "",
-    bug.error_message || ""
-  ].join(" ").toLowerCase();
+        const searchableText = [
+          bug.title || "",
+          bug.module_name || "",
+          bug.error_message || ""
+        ].join(" ").toLowerCase();
 
-  const matchesSearch = searchableText.includes(searchTerm);
+        const matchesSearch = searchableText.includes(searchTerm);
 
-  return matchesStatus && matchesSeverity && matchesSearch;
-});
+        return matchesStatus && matchesSeverity && matchesSearch;
+      });
 
-const severityRank = {
-  Critical: 3,
-  Major: 2,
-  Minor: 1
-};
+      // Sort the filtered results.
+      const severityRank = {
+        Critical: 3,
+        Major: 2,
+        Minor: 1
+      };
 
-const sortedBugs = [...filteredBugs];
+      const sortedBugs = [...filteredBugs];
 
-if (sortBy.value === "title") {
-  sortedBugs.sort((a, b) =>
-    (a.title || "").localeCompare(b.title || "")
-  );
-} else if (sortBy.value === "severity") {
-  sortedBugs.sort((a, b) =>
-    (severityRank[b.severity] || 0) -
-    (severityRank[a.severity] || 0)
-  );
-} else if (sortBy.value === "status") {
-  sortedBugs.sort((a, b) =>
-    (a.status || "").localeCompare(b.status || "")
-  );
-}
+      if (sortBy.value === "title") {
+        sortedBugs.sort((a, b) =>
+          (a.title || "").localeCompare(b.title || "")
+        );
+      } else if (sortBy.value === "severity") {
+        sortedBugs.sort((a, b) =>
+          (severityRank[b.severity] || 0) -
+          (severityRank[a.severity] || 0)
+        );
+      } else if (sortBy.value === "status") {
+        sortedBugs.sort((a, b) =>
+          (a.status || "").localeCompare(b.status || "")
+        );
+      }
 
+      // Calculate pagination after filtering and sorting.
       const totalPages = Math.max(
         1,
-        Math.ceil(filteredBugs.length / pageSize)
+        Math.ceil(sortedBugs.length / pageSize)
       );
 
       if (currentPage > totalPages) {
         currentPage = totalPages;
       }
 
-      if (filteredBugs.length === 0) {
+      if (sortedBugs.length === 0) {
         message.textContent = "No bugs found for these filters.";
         pageInfo.textContent = "Page 1 of 1";
         prevPage.disabled = true;
@@ -115,7 +118,7 @@ if (sortBy.value === "title") {
       message.textContent = "";
 
       const startIndex = (currentPage - 1) * pageSize;
-      const pageBugs = filteredBugs.slice(
+      const pageBugs = sortedBugs.slice(
         startIndex,
         startIndex + pageSize
       );
@@ -134,7 +137,7 @@ if (sortBy.value === "title") {
           row.appendChild(cell);
         });
 
-        // Status update controls
+        // Status update controls.
         const actionCell = document.createElement("td");
         const statusSelect = document.createElement("select");
 
@@ -176,7 +179,11 @@ if (sortBy.value === "title") {
               );
             }
 
+            // Refresh the dashboard and both charts.
             await loadDashboard();
+            await loadSeverityChart();
+            await loadStatusChart();
+
             document.getElementById("message").textContent =
               "Bug status updated successfully.";
           } catch (error) {
@@ -188,81 +195,99 @@ if (sortBy.value === "title") {
         actionCell.append(statusSelect, updateButton);
         row.appendChild(actionCell);
 
-        // View details and screenshot
+        // View details modal and screenshot.
         const detailsCell = document.createElement("td");
         const detailsButton = document.createElement("button");
 
         detailsButton.textContent = "View Details";
 
-        
-detailsButton.addEventListener("click", async () => {
-  const modal = document.getElementById("bugModal");
-  const closeButton = document.getElementById("closeModal");
-  const screenshot = document.getElementById("modalBugScreenshot");
-  const screenshotMessage = document.getElementById("modalScreenshotMessage");
+        detailsButton.addEventListener("click", async () => {
+          const modal = document.getElementById("bugModal");
+          const closeButton = document.getElementById("closeModal");
+          const screenshot =
+            document.getElementById("modalBugScreenshot");
+          const screenshotMessage =
+            document.getElementById("modalScreenshotMessage");
 
-  document.getElementById("modalBugTitle").textContent = bug.title;
-  document.getElementById("modalBugModule").textContent =
-    bug.module_name || "Unassigned";
-  document.getElementById("modalBugSeverity").textContent = bug.severity;
-  document.getElementById("modalBugStatus").textContent = bug.status;
-  document.getElementById("modalBugError").textContent =
-    bug.error_message || "No error message available";
+          document.getElementById("modalBugTitle").textContent =
+            bug.title;
 
-  screenshot.hidden = true;
-  screenshot.removeAttribute("src");
-  screenshotMessage.textContent = "Loading screenshot...";
+          document.getElementById("modalBugModule").textContent =
+            bug.module_name || "Unassigned";
 
-  modal.hidden = false;
-  closeButton.focus();
+          document.getElementById("modalBugSeverity").textContent =
+            bug.severity;
 
-  const closeModal = () => {
-    modal.hidden = true;
-    screenshot.removeAttribute("src");
-    detailsButton.focus();
-  };
+          document.getElementById("modalBugStatus").textContent =
+            bug.status;
 
-  closeButton.onclick = closeModal;
+          document.getElementById("modalBugError").textContent =
+            bug.error_message || "No error message available";
 
-  modal.onclick = event => {
-    if (event.target === modal) {
-      closeModal();
-    }
-  };
+          screenshot.hidden = true;
+          screenshot.removeAttribute("src");
+          screenshotMessage.textContent = "Loading screenshot...";
 
-  const handleEscape = event => {
-    if (event.key === "Escape" && !modal.hidden) {
-      closeModal();
-    }
-  };
+          modal.hidden = false;
+          closeButton.focus();
 
-  document.addEventListener("keydown", handleEscape, { once: true });
+          const closeModal = () => {
+            modal.hidden = true;
+            screenshot.removeAttribute("src");
+            detailsButton.focus();
+          };
 
-  try {
-    const response = await fetch(`/api/bugs/${bug.id}/screenshot`);
+          closeButton.onclick = closeModal;
 
-    if (!response.ok) {
-      throw new Error("Screenshot unavailable.");
-    }
+          modal.onclick = event => {
+            if (event.target === modal) {
+              closeModal();
+            }
+          };
 
-    const screenshotUrl = URL.createObjectURL(await response.blob());
+          const handleEscape = event => {
+            if (event.key === "Escape" && !modal.hidden) {
+              closeModal();
+            }
+          };
 
-    screenshot.onload = () => {
-      screenshot.hidden = false;
-      screenshotMessage.textContent = "";
-      URL.revokeObjectURL(screenshotUrl);
-    };
+          document.addEventListener(
+            "keydown",
+            handleEscape,
+            { once: true }
+          );
 
-    screenshot.onerror = () => {
-      screenshotMessage.textContent = "Unable to display screenshot.";
-      URL.revokeObjectURL(screenshotUrl);
-    };
+          try {
+            const response = await fetch(
+              `/api/bugs/${bug.id}/screenshot`
+            );
 
-    screenshot.src = screenshotUrl;
-  } catch (error) {
-    screenshotMessage.textContent = error.message;
-  }
-});
+            if (!response.ok) {
+              throw new Error("Screenshot unavailable.");
+            }
+
+            const screenshotUrl = URL.createObjectURL(
+              await response.blob()
+            );
+
+            screenshot.onload = () => {
+              screenshot.hidden = false;
+              screenshotMessage.textContent = "";
+              URL.revokeObjectURL(screenshotUrl);
+            };
+
+            screenshot.onerror = () => {
+              screenshotMessage.textContent =
+                "Unable to display screenshot.";
+
+              URL.revokeObjectURL(screenshotUrl);
+            };
+
+            screenshot.src = screenshotUrl;
+          } catch (error) {
+            screenshotMessage.textContent = error.message;
+          }
+        });
 
         detailsCell.appendChild(detailsButton);
         row.appendChild(detailsCell);
@@ -270,13 +295,13 @@ detailsButton.addEventListener("click", async () => {
         bugsTable.appendChild(row);
       });
 
-      // Update pagination controls
+      // Update pagination controls.
       pageInfo.textContent = `Page ${currentPage} of ${totalPages}`;
       prevPage.disabled = currentPage === 1;
       nextPage.disabled = currentPage === totalPages;
     }
 
-    // Avoid registering duplicate filter listeners
+    // Filters, sorting, and search reset pagination.
     statusFilter.onchange = () => {
       currentPage = 1;
       renderBugs();
@@ -288,14 +313,14 @@ detailsButton.addEventListener("click", async () => {
     };
 
     sortBy.onchange = () => {
-  currentPage = 1;
-  renderBugs();
-};
+      currentPage = 1;
+      renderBugs();
+    };
 
     searchInput.oninput = () => {
-  currentPage = 1;
-  renderBugs();
-};
+      currentPage = 1;
+      renderBugs();
+    };
 
     prevPage.onclick = () => {
       if (currentPage > 1) {
@@ -305,23 +330,8 @@ detailsButton.addEventListener("click", async () => {
     };
 
     nextPage.onclick = () => {
-      const selectedStatus = statusFilter.value;
-      const selectedSeverity = severityFilter.value;
-
-      const filteredCount = bugsData.bugs.filter(bug =>
-        (selectedStatus === "All" || bug.status === selectedStatus) &&
-        (selectedSeverity === "All" || bug.severity === selectedSeverity)
-      ).length;
-
-      const totalPages = Math.max(
-        1,
-        Math.ceil(filteredCount / pageSize)
-      );
-
-      if (currentPage < totalPages) {
-        currentPage++;
-        renderBugs();
-      }
+      currentPage++;
+      renderBugs();
     };
 
     renderBugs();
@@ -331,6 +341,8 @@ detailsButton.addEventListener("click", async () => {
   }
 }
 
+
+// Display bug details safely as plain text.
 function escapeHtml(value) {
   return String(value).replace(/[&<>"']/g, char => ({
     "&": "&amp;",
@@ -342,18 +354,14 @@ function escapeHtml(value) {
 }
 
 
+// Severity doughnut chart.
 let severityChart = null;
 
 async function loadSeverityChart() {
   const canvas = document.getElementById("severityChart");
 
-  if (!canvas) {
-    console.error("Severity chart canvas not found.");
-    return;
-  }
-
-  if (typeof Chart === "undefined") {
-    console.error("Chart.js did not load.");
+  if (!canvas || typeof Chart === "undefined") {
+    console.error("Severity chart canvas or Chart.js is unavailable.");
     return;
   }
 
@@ -420,5 +428,88 @@ async function loadSeverityChart() {
 }
 
 
+// Status bar chart.
+let statusChart = null;
+
+async function loadStatusChart() {
+  const canvas = document.getElementById("statusChart");
+
+  if (!canvas || typeof Chart === "undefined") {
+    console.error("Status chart canvas or Chart.js is unavailable.");
+    return;
+  }
+
+  try {
+    const response = await fetch("/api/bugs/stats");
+
+    if (!response.ok) {
+      throw new Error("Unable to load bug statistics.");
+    }
+
+    const statsData = await response.json();
+
+    if (!statsData.success) {
+      throw new Error("Bug statistics API returned an error.");
+    }
+
+    const statusCounts = {
+      Open: 0,
+      "In Progress": 0,
+      Resolved: 0
+    };
+
+    statsData.byStatus.forEach(item => {
+      statusCounts[item.status] = item.count;
+    });
+
+    if (statusChart) {
+      statusChart.destroy();
+    }
+
+    statusChart = new Chart(canvas, {
+      type: "bar",
+      data: {
+        labels: ["Open", "In Progress", "Resolved"],
+        datasets: [{
+          label: "Number of Bugs",
+          data: [
+            statusCounts.Open,
+            statusCounts["In Progress"],
+            statusCounts.Resolved
+          ],
+          backgroundColor: ["#dc2626", "#f59e0b", "#16a34a"],
+          borderRadius: 6
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: {
+          y: {
+            beginAtZero: true,
+            ticks: {
+              precision: 0
+            }
+          }
+        },
+        plugins: {
+          legend: {
+            display: false
+          },
+          title: {
+            display: true,
+            text: "Bugs by Status"
+          }
+        }
+      }
+    });
+  } catch (error) {
+    console.error("Status chart error:", error);
+  }
+}
+
+
+// Load dashboard and charts.
 loadDashboard();
 loadSeverityChart();
+loadStatusChart();
