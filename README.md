@@ -214,6 +214,9 @@ Users can inspect a bug's error message and screenshot path from the dashboard u
 
 - Validates and logs the total of bug severity percentages.
 
+- Module filtering combined with status, severity, and search filters.
+- Verified pagination, bug status updates, charts, screenshots, CSV export, and PDF export.
+
 
 
 

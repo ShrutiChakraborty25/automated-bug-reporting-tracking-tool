@@ -31,7 +31,8 @@ main {
   padding: 0 20px;
 }
 
-.card, .bugs-section {
+.card,
+.bugs-section {
   background: white;
   padding: 22px;
   border-radius: 12px;
@@ -59,43 +60,14 @@ table {
   text-align: left;
 }
 
-th, td {
+th,
+td {
   padding: 14px;
   border-bottom: 1px solid #e6eaf0;
 }
 
 th {
   background: #edf1f7;
-}
-
-@media (max-width: 600px) {
-  main {
-    padding: 0 12px;
-  }
-
-  th, td {
-    padding: 10px;
-  }
-}
-#statusFilter {
-  padding: 10px 14px;
-  margin: 12px 0 18px;
-  border: 1px solid #cbd5e1;
-  border-radius: 8px;
-  background: white;
-  color: #243047;
-  font-size: 15px;
-}
-
-#statusFilter,
-#severityFilter {
-  padding: 10px 14px;
-  margin: 12px 12px 18px 0;
-  border: 1px solid #cbd5e1;
-  border-radius: 8px;
-  background: white;
-  color: #243047;
-  font-size: 15px;
 }
 
 .summary {
@@ -116,6 +88,52 @@ th {
   color: #243047;
 }
 
+/* Status, severity and module filters */
+#statusFilter,
+#severityFilter,
+#moduleFilter {
+  padding: 10px 14px;
+  margin: 12px 12px 18px 0;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  background: #ffffff;
+  color: #243047;
+  font-size: 15px;
+  cursor: pointer;
+}
+
+#statusFilter:focus,
+#severityFilter:focus,
+#moduleFilter:focus {
+  outline: 2px solid #93c5fd;
+  border-color: #2563eb;
+}
+
+/* Filter layout */
+.filter-controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  margin: 16px 0;
+}
+
+/* Search */
+#searchInput {
+  padding: 10px 12px;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  font-size: 15px;
+  min-width: 240px;
+  margin: 8px 12px 12px 0;
+}
+
+#searchInput:focus {
+  outline: 2px solid #93c5fd;
+  border-color: #2563eb;
+}
+
+/* Table actions */
 td select,
 td button {
   padding: 8px 10px;
@@ -140,6 +158,7 @@ td button:disabled {
   cursor: not-allowed;
 }
 
+/* Pagination */
 .pagination {
   display: flex;
   align-items: center;
@@ -162,21 +181,7 @@ td button:disabled {
   cursor: not-allowed;
 }
 
-#searchInput {
-  padding: 10px 12px;
-  border: 1px solid #cbd5e1;
-  border-radius: 6px;
-  font-size: 15px;
-  min-width: 240px;
-  margin: 8px 12px 12px 0;
-}
-
-#searchInput:focus {
-  outline: 2px solid #93c5fd;
-  border-color: #2563eb;
-}
-
-
+/* Bug details modal */
 .modal[hidden],
 #modalBugScreenshot[hidden] {
   display: none;
@@ -251,17 +256,7 @@ td button:disabled {
   border-radius: 8px;
 }
 
-@media (max-width: 600px) {
-  .modal {
-    padding: 10px;
-  }
-
-  .modal-content {
-    padding: 20px;
-  }
-}
-
-
+/* Charts */
 .chart-section {
   margin: 24px auto;
   padding: 24px;
@@ -286,118 +281,164 @@ td button:disabled {
   margin: 0 auto;
 }
 
-
-/* Bug status chart */
 #statusChart {
   max-width: 100%;
 }
 
+/* CSV export button */
 .export-button {
-    display: inline-block;
-    padding: 10px 18px;
-    background-color: #198754;
-    color: white;
-    text-decoration: none;
-    border-radius: 6px;
-    font-weight: bold;
-    margin: 10px 0;
+  display: inline-block;
+  padding: 10px 18px;
+  background-color: #198754;
+  color: white;
+  text-decoration: none;
+  border-radius: 6px;
+  font-weight: bold;
+  margin: 10px 0;
 }
 
 .export-button:hover {
-    background-color: #146c43;
+  background-color: #146c43;
 }
 
-
+/* PDF export button */
 .pdf-export-button {
-    display: inline-block;
-    padding: 10px 18px;
-    margin: 10px 0 10px 8px;
-    background-color: #b42318;
-    color: white;
-    text-decoration: none;
-    border-radius: 6px;
-    font-weight: bold;
+  display: inline-block;
+  padding: 10px 18px;
+  margin: 10px 0 10px 8px;
+  background-color: #b42318;
+  color: white;
+  text-decoration: none;
+  border-radius: 6px;
+  font-weight: bold;
 }
 
 .pdf-export-button:hover {
-    background-color: #8f1d14;
+  background-color: #8f1d14;
 }
 
+/* Refresh dashboard */
 #refreshDashboard {
-    padding: 10px 18px;
-    margin: 10px 0 10px 8px;
-    background-color: #1d4ed8;
-    color: white;
-    border: none;
-    border-radius: 6px;
-    font-weight: bold;
-    cursor: pointer;
+  padding: 10px 18px;
+  margin: 10px 0 10px 8px;
+  background-color: #1d4ed8;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-weight: bold;
+  cursor: pointer;
 }
 
 #refreshDashboard:hover {
-    background-color: #1e40af;
+  background-color: #1e40af;
 }
 
 #refreshDashboard:disabled {
-    opacity: 0.6;
-    cursor: not-allowed;
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 
+/* Clear filters */
 #clearFilters {
-    padding: 9px 16px;
-    margin: 8px;
-    background-color: #475569;
-    color: white;
-    border: none;
-    border-radius: 6px;
-    font-weight: bold;
-    cursor: pointer;
+  padding: 9px 16px;
+  margin: 8px;
+  background-color: #475569;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-weight: bold;
+  cursor: pointer;
 }
 
 #clearFilters:hover {
-    background-color: #334155;
+  background-color: #334155;
 }
 
+/* Severity badges */
 .severity-badge {
-    font-weight: bold;
-    text-align: center;
-    border-radius: 6px;
-    padding: 6px 10px;
+  font-weight: bold;
+  text-align: center;
+  border-radius: 6px;
+  padding: 6px 10px;
 }
 
 .severity-critical {
-    color: #991b1b;
-    background-color: #fee2e2;
+  color: #991b1b;
+  background-color: #fee2e2;
 }
 
 .severity-major {
-    color: #92400e;
-    background-color: #fef3c7;
+  color: #92400e;
+  background-color: #fef3c7;
 }
 
 .severity-minor {
-    color: #166534;
-    background-color: #dcfce7;
+  color: #166534;
+  background-color: #dcfce7;
 }
 
+/* Status badges */
 .status-badge {
-    font-weight: bold;
-    text-align: center;
-    border-radius: 6px;
-    padding: 6px 10px;
+  font-weight: bold;
+  text-align: center;
+  border-radius: 6px;
+  padding: 6px 10px;
 }
 
 .status-open {
-    color: #991b1b;
-    background-color: #fee2e2;
+  color: #991b1b;
+  background-color: #fee2e2;
 }
 
 .status-in-progress {
-    color: #92400e;
-    background-color: #fef3c7;
+  color: #92400e;
+  background-color: #fef3c7;
 }
 
 .status-resolved {
-    color: #166534;
-    background-color: #dcfce7;
+  color: #166534;
+  background-color: #dcfce7;
+}
+
+/* Responsive layout */
+@media (max-width: 600px) {
+  main {
+    padding: 0 12px;
+  }
+
+  th,
+  td {
+    padding: 10px;
+  }
+
+  .chart-section {
+    width: calc(100% - 24px);
+    padding: 16px;
+  }
+
+  .chart-container {
+    height: 260px;
+  }
+
+  .filter-controls {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  #statusFilter,
+  #severityFilter,
+  #moduleFilter,
+  #searchInput {
+    width: 100%;
+    min-width: 0;
+    margin: 6px 0;
+  }
+
+  .modal {
+    padding: 10px;
+  }
+
+  .modal-content {
+    padding: 20px;
+  }
 }

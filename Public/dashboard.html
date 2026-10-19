@@ -11,11 +11,9 @@
   <header>
     <h1>Bug Tracking Dashboard</h1>
     <a href="/api/bugs/export" class="export-button">Export CSV</a>
-<a href="/api/bugs/export/pdf" class="pdf-export-button">Export PDF</a>
-<button id="refreshDashboard" type="button">Refresh Dashboard</button>
-
-
-    <p>Automated Bug Reporting & Tracking Tool</p>
+    <a href="/api/bugs/export/pdf" class="pdf-export-button">Export PDF</a>
+    <button id="refreshDashboard" type="button">Refresh Dashboard</button>
+    <p>Automated Bug Reporting &amp; Tracking Tool</p>
   </header>
 
   <main>
@@ -24,17 +22,14 @@
         <h3>Total Bugs</h3>
         <p id="totalBugs">Loading...</p>
       </article>
-
       <article class="card">
         <h3>Open Bugs</h3>
         <p id="openBugs">0</p>
       </article>
-
       <article class="card">
         <h3>In Progress</h3>
         <p id="inProgressBugs">0</p>
       </article>
-
       <article class="card">
         <h3>Resolved Bugs</h3>
         <p id="resolvedBugs">0</p>
@@ -42,133 +37,140 @@
     </section>
 
     <section class="summary" id="severitySummary">
-  <article class="card">
-    <h3>Critical</h3>
-    <p id="criticalPercentage">0%</p>
-  </article>
-
-  <article class="card">
-    <h3>Major</h3>
-    <p id="majorPercentage">0%</p>
-  </article>
-
-  <article class="card">
-    <h3>Minor</h3>
-    <p id="minorPercentage">0%</p>
-  </article>
-</section>
+      <article class="card">
+        <h3>Critical</h3>
+        <p id="criticalPercentage">0%</p>
+      </article>
+      <article class="card">
+        <h3>Major</h3>
+        <p id="majorPercentage">0%</p>
+      </article>
+      <article class="card">
+        <h3>Minor</h3>
+        <p id="minorPercentage">0%</p>
+      </article>
+    </section>
 
     <section class="bugs-section">
       <h2>Reported Bugs</h2>
       <p id="message">Loading bugs...</p>
 
+      <section class="chart-section">
+        <h2>Bug Severity Overview</h2>
+        <div class="chart-container">
+          <canvas id="severityChart"></canvas>
+        </div>
+      </section>
 
-<section class="chart-section">
-  <h2>Bug Severity Overview</h2>
-  <div class="chart-container">
-    <canvas id="severityChart"></canvas>
-  </div>
-</section>
+      <section class="chart-section">
+        <h2>Bug Status Overview</h2>
+        <div class="chart-container">
+          <canvas id="statusChart"></canvas>
+        </div>
+      </section>
 
+      <div class="filter-controls">
+        <label for="searchInput">Search bugs:</label>
+        <input
+          type="text"
+          id="searchInput"
+          placeholder="Search title, module, or error..."
+        >
 
-<section class="chart-section">
-  <h2>Bug Status Overview</h2>
-  <div class="chart-container">
-    <canvas id="statusChart"></canvas>
-  </div>
-</section>
+        <label for="statusFilter">Filter by status:</label>
+        <select id="statusFilter">
+          <option value="All">All</option>
+          <option value="Open">Open</option>
+          <option value="In Progress">In Progress</option>
+          <option value="Resolved">Resolved</option>
+        </select>
 
+        <label for="severityFilter">Filter by severity:</label>
+        <select id="severityFilter">
+          <option value="All">All Severities</option>
+          <option value="Critical">Critical</option>
+          <option value="Major">Major</option>
+          <option value="Minor">Minor</option>
+        </select>
 
+        <label for="moduleFilter">Filter by module:</label>
+        <select id="moduleFilter">
+          <option value="All">All Modules</option>
+        </select>
 
-      <label for="searchInput">Search bugs:</label>
-<input
-  type="text"
-  id="searchInput"
-  placeholder="Search title, module, or error..."
-/>
+        <label for="sortBy">Sort by:</label>
+        <select id="sortBy">
+          <option value="default">Default order</option>
+          <option value="title">Bug title (A–Z)</option>
+          <option value="severity">Severity (highest first)</option>
+          <option value="status">Status (A–Z)</option>
+        </select>
 
-      <label for="statusFilter">Filter by status:</label>
-      <select id="statusFilter">
-        <option value="All">All</option>
-        <option value="Open">Open</option>
-        <option value="In Progress">In Progress</option>
-        <option value="Resolved">Resolved</option>
-      </select>
-
-      <label for="severityFilter">Filter by severity:</label>
-      <select id="severityFilter">
-        <option value="All">All</option>
-        <option value="Critical">Critical</option>
-        <option value="Major">Major</option>
-        <option value="Minor">Minor</option>
-      </select>
-
-
-<label for="sortBy">Sort by:</label>
-<select id="sortBy">
-  <option value="default">Default order</option>
-  <option value="title">Bug title (A–Z)</option>
-  <option value="severity">Severity (highest first)</option>
-  <option value="status">Status (A–Z)</option>
-</select>
-
-<button id="clearFilters" type="button">Clear Filters</button>
+        <button id="clearFilters" type="button">Clear Filters</button>
+      </div>
 
       <div class="table-wrapper">
         <table>
-          
-<thead>
-  <tr>
-    <th>Bug ID</th>
-    <th>Title</th>
-    <th>Created At</th>
-    <th>Module</th>
-    <th>Severity</th>
-    <th>Status</th>
-    <th>Action</th>
-    <th>Details</th>
-  </tr>
-</thead>
-
+          <thead>
+            <tr>
+              <th>Bug ID</th>
+              <th>Title</th>
+              <th>Created At</th>
+              <th>Module</th>
+              <th>Severity</th>
+              <th>Status</th>
+              <th>Action</th>
+              <th>Details</th>
+            </tr>
+          </thead>
           <tbody id="bugsTable"></tbody>
         </table>
       </div>
 
       <div class="pagination">
-  <button id="prevPage" disabled>Previous</button>
-  <span id="pageInfo">Page 1</span>
-  <button id="nextPage">Next</button>
-</div>
-
+        <button id="prevPage" type="button" disabled>Previous</button>
+        <span id="pageInfo">Page 1</span>
+        <button id="nextPage" type="button">Next</button>
+      </div>
     </section>
   </main>
 
+  <!-- Bug Details Modal -->
+  <div
+    id="bugModal"
+    class="modal"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="modalBugTitle"
+    hidden
+  >
+    <div class="modal-content">
+      <button
+        id="closeModal"
+        class="modal-close"
+        type="button"
+        aria-label="Close bug details"
+      >&times;</button>
 
-<!-- Bug Details Modal -->
-<div id="bugModal" class="modal" role="dialog" aria-modal="true"
-     aria-labelledby="modalBugTitle" hidden>
-  <div class="modal-content">
-    <button id="closeModal" class="modal-close"
-            type="button" aria-label="Close bug details">&times;</button>
+      <h2 id="modalBugTitle">Bug Details</h2>
+      <p><strong>Module:</strong> <span id="modalBugModule"></span></p>
+      <p><strong>Severity:</strong> <span id="modalBugSeverity"></span></p>
+      <p><strong>Status:</strong> <span id="modalBugStatus"></span></p>
 
-    <h2 id="modalBugTitle">Bug Details</h2>
+      <h3>Error Message</h3>
+      <pre id="modalBugError">Loading...</pre>
 
-    <p><strong>Module:</strong> <span id="modalBugModule"></span></p>
-    <p><strong>Severity:</strong> <span id="modalBugSeverity"></span></p>
-    <p><strong>Status:</strong> <span id="modalBugStatus"></span></p>
-
-    <h3>Error Message</h3>
-    <pre id="modalBugError">Loading...</pre>
-
-    <h3>Screenshot</h3>
-    <p id="modalScreenshotMessage">Loading screenshot...</p>
-    <img id="modalBugScreenshot" alt="Screenshot of the failed test" hidden>
+      <h3>Screenshot</h3>
+      <p id="modalScreenshotMessage">Loading screenshot...</p>
+      <img
+        id="modalBugScreenshot"
+        alt="Screenshot of the failed test"
+        hidden
+      >
+    </div>
   </div>
-</div>
 
-
-
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="/dashboard.js"></script>
 </body>
 </html>

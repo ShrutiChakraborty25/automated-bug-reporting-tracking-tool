@@ -1,10 +1,10 @@
-
 async function loadDashboard() {
   const message = document.getElementById("message");
   const totalBugs = document.getElementById("totalBugs");
   const bugsTable = document.getElementById("bugsTable");
   const statusFilter = document.getElementById("statusFilter");
   const severityFilter = document.getElementById("severityFilter");
+  const moduleFilter = document.getElementById("moduleFilter");
   const sortBy = document.getElementById("sortBy");
   const searchInput = document.getElementById("searchInput");
   const prevPage = document.getElementById("prevPage");
@@ -41,11 +41,46 @@ async function loadDashboard() {
       );
     }
 
+    // Populate the module filter dynamically.
+    const moduleNames = [
+      ...new Set(
+        bugsData.bugs
+          .map(bug => bug.module_name)
+          .filter(
+            moduleName =>
+              moduleName && moduleName !== "Unassigned"
+          )
+      )
+    ].sort();
+
+    const selectedModule = moduleFilter.value;
+
+    moduleFilter.replaceChildren();
+
+    const allModulesOption = document.createElement("option");
+    allModulesOption.value = "All";
+    allModulesOption.textContent = "All Modules";
+    moduleFilter.appendChild(allModulesOption);
+
+    moduleNames.forEach(moduleName => {
+      const option = document.createElement("option");
+      option.value = moduleName;
+      option.textContent = moduleName;
+      moduleFilter.appendChild(option);
+    });
+
+    moduleFilter.value = moduleNames.includes(selectedModule)
+      ? selectedModule
+      : "All";
+
     // Update summary cards.
     totalBugs.textContent = statsData.totalBugs;
 
     const statusCounts = Object.fromEntries(
-      statsData.byStatus.map(item => [item.status, item.count])
+      statsData.byStatus.map(item => [
+        item.status,
+        item.count
+      ])
     );
 
     document.getElementById("openBugs").textContent =
@@ -57,54 +92,71 @@ async function loadDashboard() {
     document.getElementById("resolvedBugs").textContent =
       statusCounts["Resolved"] || 0;
 
-      const severityCounts = {
-  Critical: 0,
-  Major: 0,
-  Minor: 0
-};
+    // Calculate severity counts.
+    const severityCounts = {
+      Critical: 0,
+      Major: 0,
+      Minor: 0
+    };
 
-statsData.bySeverity.forEach(item => {
-  if (Object.hasOwn(severityCounts, item.severity)) {
-    severityCounts[item.severity] = item.count;
-  }
-});
+    statsData.bySeverity.forEach(item => {
+      if (Object.hasOwn(severityCounts, item.severity)) {
+        severityCounts[item.severity] = item.count;
+      }
+    });
 
-const totalSeverityBugs = Object.values(severityCounts)
-  .reduce((sum, count) => sum + count, 0);
+    // Calculate severity percentages.
+    const totalSeverityBugs = Object.values(severityCounts)
+      .reduce((sum, count) => sum + count, 0);
 
-document.getElementById("criticalPercentage").textContent =
-  `${totalSeverityBugs ? Math.round(severityCounts.Critical / totalSeverityBugs * 100) : 0}%`;
+    document.getElementById("criticalPercentage").textContent =
+      `${totalSeverityBugs
+        ? Math.round(
+            severityCounts.Critical / totalSeverityBugs * 100
+          )
+        : 0}%`;
 
-document.getElementById("majorPercentage").textContent =
-  `${totalSeverityBugs ? Math.round(severityCounts.Major / totalSeverityBugs * 100) : 0}%`;
+    document.getElementById("majorPercentage").textContent =
+      `${totalSeverityBugs
+        ? Math.round(
+            severityCounts.Major / totalSeverityBugs * 100
+          )
+        : 0}%`;
 
-document.getElementById("minorPercentage").textContent =
-  `${totalSeverityBugs ? Math.round(severityCounts.Minor / totalSeverityBugs * 100) : 0}%`;
+    document.getElementById("minorPercentage").textContent =
+      `${totalSeverityBugs
+        ? Math.round(
+            severityCounts.Minor / totalSeverityBugs * 100
+          )
+        : 0}%`;
 
-  const severityPercentageTotal =
-  Math.round(
-    severityCounts.Critical / totalSeverityBugs * 100
-  ) +
-  Math.round(
-    severityCounts.Major / totalSeverityBugs * 100
-  ) +
-  Math.round(
-    severityCounts.Minor / totalSeverityBugs * 100
-  );
+    const severityPercentageTotal =
+      Math.round(
+        severityCounts.Critical / totalSeverityBugs * 100
+      ) +
+      Math.round(
+        severityCounts.Major / totalSeverityBugs * 100
+      ) +
+      Math.round(
+        severityCounts.Minor / totalSeverityBugs * 100
+      );
 
-console.log(
-  "Severity percentage total:",
-  totalSeverityBugs ? severityPercentageTotal + "%" : "No bugs available"
-);
+    console.log(
+      "Severity percentage total:",
+      totalSeverityBugs
+        ? severityPercentageTotal + "%"
+        : "No bugs available"
+    );
 
     function renderBugs() {
       bugsTable.replaceChildren();
 
       const selectedStatus = statusFilter.value;
       const selectedSeverity = severityFilter.value;
+      const selectedModule = moduleFilter.value;
       const searchTerm = searchInput.value.trim().toLowerCase();
 
-      // Filter bugs by status, severity and search text.
+      // Filter by status, severity, module and search.
       const filteredBugs = bugsData.bugs.filter(bug => {
         const matchesStatus =
           selectedStatus === "All" ||
@@ -113,6 +165,10 @@ console.log(
         const matchesSeverity =
           selectedSeverity === "All" ||
           bug.severity === selectedSeverity;
+
+        const matchesModule =
+          selectedModule === "All" ||
+          bug.module_name === selectedModule;
 
         const searchableText = [
           bug.id,
@@ -127,10 +183,15 @@ console.log(
         const matchesSearch =
           searchableText.includes(searchTerm);
 
-        return matchesStatus && matchesSeverity && matchesSearch;
+        return (
+          matchesStatus &&
+          matchesSeverity &&
+          matchesModule &&
+          matchesSearch
+        );
       });
 
-      // Sort filtered bugs.
+      // Sort bugs.
       const severityRank = {
         Critical: 3,
         Major: 2,
@@ -178,6 +239,7 @@ console.log(
       message.textContent = "";
 
       const startIndex = (currentPage - 1) * pageSize;
+
       const pageBugs = sortedBugs.slice(
         startIndex,
         startIndex + pageSize
@@ -186,40 +248,42 @@ console.log(
       pageBugs.forEach(bug => {
         const row = document.createElement("tr");
 
-        // Bug ID, title, creation date, module, severity and status.
         const createdAt = bug.created_at
           ? new Date(bug.created_at).toLocaleString()
           : "Unknown";
 
+        // Display bug information.
         [
-  bug.id,
-  bug.title || "Untitled",
-  createdAt,
-  bug.module_name || "Unassigned",
-  bug.severity || "Unknown",
-  bug.status || "Open"
-].forEach((value, index) => {
-  const cell = document.createElement("td");
-  cell.textContent = value ?? "—";
+          bug.id,
+          bug.title || "Untitled",
+          createdAt,
+          bug.module_name || "Unassigned",
+          bug.severity || "Unknown",
+          bug.status || "Open"
+        ].forEach((value, index) => {
+          const cell = document.createElement("td");
+          cell.textContent = value ?? "—";
 
-  if (index === 4) {
-  cell.classList.add(
-    "severity-badge",
-    `severity-${String(value).toLowerCase()}`
-  );
-}
+          // Severity badge styling.
+          if (index === 4) {
+            cell.classList.add(
+              "severity-badge",
+              `severity-${String(value).toLowerCase()}`
+            );
+          }
 
-if (index === 5) {
-  cell.classList.add(
-    "status-badge",
-    `status-${String(value)
-      .toLowerCase()
-      .replace(/\s+/g, "-")}`
-  );
-}
+          // Status badge styling.
+          if (index === 5) {
+            cell.classList.add(
+              "status-badge",
+              `status-${String(value)
+                .toLowerCase()
+                .replace(/\s+/g, "-")}`
+            );
+          }
 
-  row.appendChild(cell);
-});
+          row.appendChild(cell);
+        });
 
         // Status update controls.
         const actionCell = document.createElement("td");
@@ -280,7 +344,7 @@ if (index === 5) {
         actionCell.append(statusSelect, updateButton);
         row.appendChild(actionCell);
 
-        // View details modal.
+        // View bug details.
         const detailsCell = document.createElement("td");
         const detailsButton = document.createElement("button");
 
@@ -290,8 +354,10 @@ if (index === 5) {
         detailsButton.addEventListener("click", async () => {
           const modal = document.getElementById("bugModal");
           const closeButton = document.getElementById("closeModal");
+
           const screenshot =
             document.getElementById("modalBugScreenshot");
+
           const screenshotMessage =
             document.getElementById("modalScreenshotMessage");
 
@@ -312,6 +378,7 @@ if (index === 5) {
 
           screenshot.hidden = true;
           screenshot.removeAttribute("src");
+
           screenshotMessage.textContent = "Loading screenshot...";
 
           modal.hidden = false;
@@ -320,7 +387,12 @@ if (index === 5) {
           const closeModal = () => {
             modal.hidden = true;
             screenshot.removeAttribute("src");
-            document.removeEventListener("keydown", handleEscape);
+
+            document.removeEventListener(
+              "keydown",
+              handleEscape
+            );
+
             detailsButton.focus();
           };
 
@@ -361,8 +433,10 @@ if (index === 5) {
 
             screenshot.onerror = () => {
               screenshot.hidden = true;
+
               screenshotMessage.textContent =
                 "Unable to display screenshot.";
+
               URL.revokeObjectURL(screenshotUrl);
             };
 
@@ -386,13 +460,18 @@ if (index === 5) {
       nextPage.disabled = currentPage === totalPages;
     }
 
-    // Filters, sorting and search.
+    // Filter event handlers.
     statusFilter.onchange = () => {
       currentPage = 1;
       renderBugs();
     };
 
     severityFilter.onchange = () => {
+      currentPage = 1;
+      renderBugs();
+    };
+
+    moduleFilter.onchange = () => {
       currentPage = 1;
       renderBugs();
     };
@@ -415,6 +494,7 @@ if (index === 5) {
       clearFiltersButton.onclick = () => {
         statusFilter.value = "All";
         severityFilter.value = "All";
+        moduleFilter.value = "All";
         sortBy.value = "default";
         searchInput.value = "";
         currentPage = 1;
@@ -464,7 +544,9 @@ async function loadSeverityChart() {
   const canvas = document.getElementById("severityChart");
 
   if (!canvas || typeof Chart === "undefined") {
-    console.error("Severity chart canvas or Chart.js is unavailable.");
+    console.error(
+      "Severity chart canvas or Chart.js is unavailable."
+    );
     return;
   }
 
@@ -511,7 +593,11 @@ async function loadSeverityChart() {
             severityCounts.Major,
             severityCounts.Minor
           ],
-          backgroundColor: ["#dc2626", "#f59e0b", "#16a34a"],
+          backgroundColor: [
+            "#dc2626",
+            "#f59e0b",
+            "#16a34a"
+          ],
           borderColor: "#ffffff",
           borderWidth: 3
         }]
@@ -532,6 +618,7 @@ async function loadSeverityChart() {
     });
   } catch (error) {
     console.error("Severity chart error:", error);
+
     document.getElementById("message").textContent =
       "Unable to load the severity chart. Please refresh the page.";
   }
@@ -545,7 +632,9 @@ async function loadStatusChart() {
   const canvas = document.getElementById("statusChart");
 
   if (!canvas || typeof Chart === "undefined") {
-    console.error("Status chart canvas or Chart.js is unavailable.");
+    console.error(
+      "Status chart canvas or Chart.js is unavailable."
+    );
     return;
   }
 
@@ -592,7 +681,11 @@ async function loadStatusChart() {
             statusCounts["In Progress"],
             statusCounts.Resolved
           ],
-          backgroundColor: ["#dc2626", "#f59e0b", "#16a34a"],
+          backgroundColor: [
+            "#dc2626",
+            "#f59e0b",
+            "#16a34a"
+          ],
           borderRadius: 6
         }]
       },
@@ -620,6 +713,7 @@ async function loadStatusChart() {
     });
   } catch (error) {
     console.error("Status chart error:", error);
+
     document.getElementById("message").textContent =
       "Unable to load the status chart. Please refresh the page.";
   }
@@ -633,7 +727,8 @@ loadStatusChart();
 
 
 // Manual dashboard refresh.
-const refreshButton = document.getElementById("refreshDashboard");
+const refreshButton =
+  document.getElementById("refreshDashboard");
 
 if (refreshButton) {
   refreshButton.addEventListener("click", async () => {
