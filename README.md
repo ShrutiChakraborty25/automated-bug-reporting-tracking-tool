@@ -199,6 +199,8 @@ Users can inspect a bug's error message and screenshot path from the dashboard u
 
 - Export bug reports to PDF directly from the dashboard.
 
+- Manually refresh bug records, summary cards, and charts from the dashboard.
+
 
 
 

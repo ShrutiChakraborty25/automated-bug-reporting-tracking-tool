@@ -540,3 +540,21 @@ async function loadStatusChart() {
 loadDashboard();
 loadSeverityChart();
 loadStatusChart();
+
+const refreshButton = document.getElementById("refreshDashboard");
+
+if (refreshButton) {
+  refreshButton.addEventListener("click", async () => {
+    refreshButton.disabled = true;
+    refreshButton.textContent = "Refreshing...";
+
+    try {
+      await loadDashboard();
+      await loadSeverityChart();
+      await loadStatusChart();
+    } finally {
+      refreshButton.disabled = false;
+      refreshButton.textContent = "Refresh Dashboard";
+    }
+  });
+}
