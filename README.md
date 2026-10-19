@@ -212,6 +212,8 @@ Users can inspect a bug's error message and screenshot path from the dashboard u
 
 - Display severity percentages in dashboard summary cards.
 
+- Validates and logs the total of bug severity percentages.
+
 
 
 

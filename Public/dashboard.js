@@ -81,6 +81,22 @@ document.getElementById("majorPercentage").textContent =
 document.getElementById("minorPercentage").textContent =
   `${totalSeverityBugs ? Math.round(severityCounts.Minor / totalSeverityBugs * 100) : 0}%`;
 
+  const severityPercentageTotal =
+  Math.round(
+    severityCounts.Critical / totalSeverityBugs * 100
+  ) +
+  Math.round(
+    severityCounts.Major / totalSeverityBugs * 100
+  ) +
+  Math.round(
+    severityCounts.Minor / totalSeverityBugs * 100
+  );
+
+console.log(
+  "Severity percentage total:",
+  totalSeverityBugs ? severityPercentageTotal + "%" : "No bugs available"
+);
+
     function renderBugs() {
       bugsTable.replaceChildren();
 
