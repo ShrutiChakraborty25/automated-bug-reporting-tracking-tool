@@ -206,6 +206,8 @@ Users can inspect a bug's error message and screenshot path from the dashboard u
 
 - Display bug IDs and creation timestamps in the dashboard table.
 
+- Color-coded severity badges for Critical, Major, and Minor bugs.
+
 
 
 

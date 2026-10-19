@@ -357,3 +357,25 @@ td button:disabled {
 #clearFilters:hover {
     background-color: #334155;
 }
+
+.severity-badge {
+    font-weight: bold;
+    text-align: center;
+    border-radius: 6px;
+    padding: 6px 10px;
+}
+
+.severity-critical {
+    color: #991b1b;
+    background-color: #fee2e2;
+}
+
+.severity-major {
+    color: #92400e;
+    background-color: #fef3c7;
+}
+
+.severity-minor {
+    color: #166534;
+    background-color: #dcfce7;
+}

@@ -152,17 +152,25 @@ async function loadDashboard() {
           : "Unknown";
 
         [
-          bug.id,
-          bug.title || "Untitled",
-          createdAt,
-          bug.module_name || "Unassigned",
-          bug.severity || "Unknown",
-          bug.status || "Open"
-        ].forEach(value => {
-          const cell = document.createElement("td");
-          cell.textContent = value ?? "—";
-          row.appendChild(cell);
-        });
+  bug.id,
+  bug.title || "Untitled",
+  createdAt,
+  bug.module_name || "Unassigned",
+  bug.severity || "Unknown",
+  bug.status || "Open"
+].forEach((value, index) => {
+  const cell = document.createElement("td");
+  cell.textContent = value ?? "—";
+
+  if (index === 4) {
+    cell.classList.add(
+      "severity-badge",
+      `severity-${String(value).toLowerCase()}`
+    );
+  }
+
+  row.appendChild(cell);
+});
 
         // Status update controls.
         const actionCell = document.createElement("td");
