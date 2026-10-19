@@ -204,6 +204,8 @@ Users can inspect a bug's error message and screenshot path from the dashboard u
 - Clear search and filters with one click.
 - Display helpful messages when no bug reports or search results are available.
 
+- Display bug IDs and creation timestamps in the dashboard table.
+
 
 
 
