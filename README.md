@@ -208,6 +208,8 @@ Users can inspect a bug's error message and screenshot path from the dashboard u
 
 - Color-coded severity badges for Critical, Major, and Minor bugs.
 
+- Color-coded status badges for Open, In Progress, and Resolved bugs.
+
 
 
 

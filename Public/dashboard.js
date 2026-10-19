@@ -163,11 +163,20 @@ async function loadDashboard() {
   cell.textContent = value ?? "—";
 
   if (index === 4) {
-    cell.classList.add(
-      "severity-badge",
-      `severity-${String(value).toLowerCase()}`
-    );
-  }
+  cell.classList.add(
+    "severity-badge",
+    `severity-${String(value).toLowerCase()}`
+  );
+}
+
+if (index === 5) {
+  cell.classList.add(
+    "status-badge",
+    `status-${String(value)
+      .toLowerCase()
+      .replace(/\s+/g, "-")}`
+  );
+}
 
   row.appendChild(cell);
 });
