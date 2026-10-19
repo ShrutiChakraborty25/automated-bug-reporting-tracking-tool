@@ -116,13 +116,17 @@ async function loadDashboard() {
       }
 
       if (sortedBugs.length === 0) {
-        message.textContent = "No bugs found for these filters.";
-        pageInfo.textContent = "Page 1 of 1";
-        prevPage.disabled = true;
-        nextPage.disabled = true;
-        return;
-      }
+  const hasBugs = bugsData.bugs.length > 0;
 
+  message.textContent = hasBugs
+    ? "No bugs match your current search or filters."
+    : "No bug reports available yet. Run your Playwright tests to generate reports.";
+
+  pageInfo.textContent = "Page 1 of 1";
+  prevPage.disabled = true;
+  nextPage.disabled = true;
+  return;
+}
       message.textContent = "";
 
       const startIndex = (currentPage - 1) * pageSize;
@@ -329,6 +333,19 @@ async function loadDashboard() {
       currentPage = 1;
       renderBugs();
     };
+
+    const clearFiltersButton = document.getElementById("clearFilters");
+
+if (clearFiltersButton) {
+  clearFiltersButton.onclick = () => {
+    statusFilter.value = "All";
+    severityFilter.value = "All";
+    sortBy.value = "default";
+    searchInput.value = "";
+    currentPage = 1;
+    renderBugs();
+  };
+}
 
     prevPage.onclick = () => {
       if (currentPage > 1) {
