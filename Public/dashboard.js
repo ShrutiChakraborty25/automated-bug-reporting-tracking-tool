@@ -57,6 +57,30 @@ async function loadDashboard() {
     document.getElementById("resolvedBugs").textContent =
       statusCounts["Resolved"] || 0;
 
+      const severityCounts = {
+  Critical: 0,
+  Major: 0,
+  Minor: 0
+};
+
+statsData.bySeverity.forEach(item => {
+  if (Object.hasOwn(severityCounts, item.severity)) {
+    severityCounts[item.severity] = item.count;
+  }
+});
+
+const totalSeverityBugs = Object.values(severityCounts)
+  .reduce((sum, count) => sum + count, 0);
+
+document.getElementById("criticalPercentage").textContent =
+  `${totalSeverityBugs ? Math.round(severityCounts.Critical / totalSeverityBugs * 100) : 0}%`;
+
+document.getElementById("majorPercentage").textContent =
+  `${totalSeverityBugs ? Math.round(severityCounts.Major / totalSeverityBugs * 100) : 0}%`;
+
+document.getElementById("minorPercentage").textContent =
+  `${totalSeverityBugs ? Math.round(severityCounts.Minor / totalSeverityBugs * 100) : 0}%`;
+
     function renderBugs() {
       bugsTable.replaceChildren();
 

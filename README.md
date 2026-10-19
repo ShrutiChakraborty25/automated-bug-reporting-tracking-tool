@@ -210,6 +210,8 @@ Users can inspect a bug's error message and screenshot path from the dashboard u
 
 - Color-coded status badges for Open, In Progress, and Resolved bugs.
 
+- Display severity percentages in dashboard summary cards.
+
 
 
 
